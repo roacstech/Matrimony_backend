@@ -1,31 +1,41 @@
-const sendRejectionMail = async (toEmail, name, reason = "") => {
+const nodemailer = require("nodemailer");
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
+
+const sendApprovalMail = async (toEmail, name) => {
   try {
+    console.log("📨 Sending approval mail to:", toEmail);
+
     await transporter.sendMail({
       from: `"Kalyanamalai Matrimony" <${process.env.SMTP_USER}>`,
       to: toEmail,
-      subject: "Profile Update ❌ | Kalyanamalai Matrimony",
-      html: `
-        <h2>Dear ${name},</h2>
-        <p>Thank you for submitting your matrimony profile.</p>
-
-        <p>After review, your profile could not be approved at this time.</p>
-
-        ${reason ? `<p><b>Reason:</b> ${reason}</p>` : ""}
-
-        <p>You may login, update your details and submit again.</p>
-        <br/>
-        <b>– Kalyanamalai Matrimony Team</b>
-      `,
+      subject: "Profile Approved ✅",
+      html: `<h3>Hello ${name}</h3><p>Your profile approved 🎉</p>`,
     });
 
-    console.log("📧 Rejection mail sent to:", toEmail);
+    console.log("✅ Approval mail sent successfully to:", toEmail);
   } catch (err) {
-    console.error("❌ Rejection mail failed:", err.message);
+    console.error("❌ Approval mail failed:", err.message);
   }
 };
 
+
+const sendRejectionMail = async (toEmail, name, reason = "") => {
+  await transporter.sendMail({
+    from: `"Kalyanamalai Matrimony" <${process.env.SMTP_USER}>`,
+    to: toEmail,
+    subject: "Profile Rejected ❌",
+    html: `<h3>Hello ${name},</h3><p>${reason}</p>`,
+  });
+};
+
 module.exports = {
-  sendSignupMail,
   sendApprovalMail,
   sendRejectionMail,
 };
