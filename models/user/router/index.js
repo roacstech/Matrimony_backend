@@ -1,11 +1,15 @@
 const express = require("express");
 const router = express.Router();
+const controller = require("../controller");
+const upload = require("../../../middleware/upload"); // 👈 ADD THIS
 
-const { submitUserForm } = require("../controller");
-const { verifyToken } = require("../../../middleware/authmiddleware");
-console.log("verifyToken type:", typeof verifyToken);
+router.post(
+  "/form/submit",
+  upload.fields([
+    { name: "photo", maxCount: 1 },
+    { name: "horoscope", maxCount: 1 },
+  ]),
+  controller.submitProfile
+);
 
-
-router.post("/form/submit", verifyToken, submitUserForm);
-
-module.exports = router; // 🔥 MUST
+module.exports = router;

@@ -1,11 +1,29 @@
-const userService = require("../services/index");
 
-exports.submitUserForm = async (req, res) => {
+const service = require("../services");
+
+module.exports.submitProfile = async (req, res) => {
+   console.log("BODY 👉", req.body);
+  console.log("FILES 👉", req.files);
+
   try {
-    await userService.submitForm(req.user, req.body);
-    res.json({ success: true, message: "Form submitted" });
+const response = await service.submitProfile(req.body, req.files);
+
+    if (!response.success) {
+      return res.status(400).json({
+        success: false,
+        message: response.error || "Profile submit failed"
+      });
+    }
+
+    return res.status(201).json({
+      success: true,
+      message: response.message,
+      data: response.data
+    });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Submit failed" });
+    return res.status(500).json({
+      success: false,
+      message: err.message
+    });
   }
 };
