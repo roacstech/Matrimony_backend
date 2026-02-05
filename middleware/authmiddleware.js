@@ -52,7 +52,12 @@ console.log("VERIFY SECRET:", process.env.JWT_SECRET);
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     console.log("TOKEN DECODED:", decoded);
 
-    req.user = decoded;
+    req.user = {
+      id: decoded.userid || decoded.id,      // 👈 FIX
+      email: decoded.email,
+      roleid: decoded.roleid,
+      status: decoded.status,
+    };
     next();
   } catch (err) {
     console.error("JWT ERROR 👉", err.message);

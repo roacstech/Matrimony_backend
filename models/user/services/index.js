@@ -219,50 +219,56 @@ module.exports.submitProfile = async (payload, files, user) => {
     }
 
     // ✅ Insert profile
-    const insertData = {
-      full_name: payload.fullName,
-      gender: payload.gender,
-      dob: payload.dob,
-      birth_time: convertTo24Hour(payload.birthTime),
-      marital_status: payload.maritalStatus,
-      education: payload.education,
-      occupation: payload.occupation,
-      income: payload.income,
+ const insertData = {
+  user_id: user.userid,
+  full_name: payload.fullName,
+  gender: payload.gender,
+  dob: payload.dob,
+  birth_time: convertTo24Hour(payload.birthTime, payload.birthPeriod),
+  marital_status: payload.maritalStatus,
+  education: payload.education,
+  occupation: payload.occupation,
+  income: payload.income,
 
-      // 🔒 Always trust JWT
-      email: user.email,
+  email: user.email,
 
-      father_name: payload.father,
-      mother_name: payload.mother,
-      grandfather_name: payload.grandfather,
-      grandmother_name: payload.grandmother,
-      siblings: payload.siblings,
+  father_name: payload.father,
+  mother_name: payload.mother,
+  grandfather_name: payload.grandfather,
+  grandmother_name: payload.grandmother,
+  siblings: payload.siblings,
 
-      raasi: payload.raasi,
-      star: payload.star,
-      dosham: payload.dosham,
-      birth_place: payload.city,
+  raasi: payload.raasi,
+  star: payload.star,
 
-      religion: payload.religion,
-      caste: payload.caste,
+  dosham:
+    payload.dosham === "Yes" || payload.dosham === "No"
+      ? payload.dosham
+      : "No",
 
-      address: payload.address,
-      city: payload.city,
-      country: payload.country,
+  birth_place: payload.city,
 
-      privacy: payload.privacy,
+  religion: payload.religion,
+  caste: payload.caste,
 
-      horoscope_uploaded: files?.horoscope ? 1 : 0,
-      horoscope_file_name: files?.horoscope?.[0]?.originalname || null,
-      horoscope_file_url: files?.horoscope
-        ? `/uploads/horoscope/${files.horoscope[0].originalname}`
-        : null,
+  address: payload.address,
+  city: payload.city,
+  country: payload.country,
 
-      photo: files?.photo?.[0]?.originalname || null,
+  privacy: payload.privacy,
 
-      is_public: payload.privacy === "Public" ? 1 : 0,
-      created_at: new Date(),
-    };
+  horoscope_uploaded: files?.horoscope ? 1 : 0,
+  horoscope_file_name: files?.horoscope?.[0]?.originalname || null,
+  horoscope_file_url: files?.horoscope
+    ? `/uploads/horoscope/${files.horoscope[0].originalname}`
+    : null,
+
+  photo: files?.photo?.[0]?.originalname || null,
+
+  is_public: payload.privacy === "Public" ? 1 : 0,
+  created_at: new Date(),
+};
+
 
     const [profileId] = await db("profiles").insert(insertData);
 
@@ -286,3 +292,108 @@ module.exports.submitProfile = async (payload, files, user) => {
 };
 
 
+
+module.exports.getVisibleConnections = async (userId) => {
+  try {
+    const profiles = await db("profiles");
+
+    return {
+      success: true,
+      data: profiles,   // 👈 IMPORTANT
+      message: profiles.length
+        ? "Data fetched successfully"
+        : "No data available"
+    };
+  } catch (err) {
+    return {
+      success: false,
+      message: err.message
+    };
+  }
+};
+
+
+
+module.exports.getUserProfile = async (userid) => {
+  try {
+    const profile = await db("profiles")
+    .where({ user_id:userid })
+  .first();
+
+    if (!profile) {
+      return { success: false, message: "Profile not found" };
+    }
+
+    return {
+      success: true,
+      data: {
+        ...profile,
+        horoscope: {
+          uploaded: profile.horoscope_uploaded === 1,
+          fileUrl: profile.horoscope_file_url,
+          fileName: profile.horoscope_file_name,
+        },
+      },
+    };
+  } catch (err) {
+    return { success: false, message: err.message };
+  }
+};
+
+module.exports.sendConnectionRequest = async (fromUser, toUser) => {
+  try {
+    const exists = await db("connections")
+      .where({ from_user: fromUser, to_user: toUser })
+      .first();
+
+    if (exists) {
+      return {
+        success: false,
+        message: "Already requested"
+      };
+    }
+
+    await db("connections").insert({
+      from_user: fromUser,
+      to_user: toUser
+    });
+
+    return {
+      success: true
+    };
+
+  } catch (err) {
+    return {
+      success: false,
+      message: err.message
+    };
+  }
+};
+
+
+
+module.exports.getReceivedConnections = async (userId) => {
+  try {
+    const rows = await db("connections as c")
+      .join("users as u", "u.id", "c.from_user")
+      .select(
+        "c.id as connectionId",
+        "u.id as userId",
+        "u.name",
+        "u.email",
+        "c.created_at"
+      )
+      .where("c.to_user", userId);
+
+    return {
+      success: true,
+      data: rows
+    };
+
+  } catch (err) {
+    return {
+      success: false,
+      message: err.message
+    };
+  }
+};

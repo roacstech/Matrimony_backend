@@ -42,3 +42,146 @@ module.exports.rejectUser = async (req, res) => {
     });
   }
 };
+
+
+// ACCEPT USER
+module.exports.acceptUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    const result = await adminService.acceptUser(userId);
+
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "User approved successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to approve user",
+    });
+  }
+};
+
+
+
+// 🔹 GET ALL USERS
+module.exports.getAllUsers = async (req, res) => {
+  try {
+    const result = await adminService.getAllUsers();
+    return res.status(200).json(result);
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch users",
+    });
+  }
+};
+
+// 🔹 GET PENDING USERS
+module.exports.getPendingUsers = async (req, res) => {
+  try {
+    const result = await adminService.getPendingUsers();
+    return res.status(200).json(result);
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch pending users",
+    });
+  }
+};
+
+// ✅ ADMIN APPROVE
+module.exports.adminApproveUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await adminService.adminApproveUser(id);
+
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile approved successfully",
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Approve failed",
+    });
+  }
+};
+
+// ❌ ADMIN REJECT
+module.exports.adminRejectUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await adminService.adminRejectUser(id);
+
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile rejected successfully",
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Reject failed",
+    });
+  }
+};
+
+// 👁 TOGGLE VISIBILITY
+module.exports.adminToggleVisibility = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await adminService.adminToggleVisibility(id);
+
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Visibility updated",
+      isPublic: result.isPublic,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Visibility update failed",
+    });
+  }
+};
+
+
+
+// ================= DASHBOARD =================
+module.exports.getAdminDashboard = async (req, res) => {
+  try {
+    const result = await adminService.getAdminDashboardStats();
+
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: result.data,
+    });
+  } catch (err) {
+    console.error("Dashboard Error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch dashboard data",
+    });
+  }
+};

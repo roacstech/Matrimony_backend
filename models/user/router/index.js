@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const controller = require("../controller");
+const controller = require("../controller/index");
 const upload = require("../../../middleware/upload"); // 👈 ADD THIS
 const authmiddleware = require("../../../middleware/authmiddleware");
 
@@ -14,4 +14,10 @@ router.post(
   controller.submitProfile
 );
 
+
+
+router.get("/connections",authmiddleware, controller.getVisibleConnections);
+router.get("/profile/:id",authmiddleware,controller.getUserProfile);
+router.post("/sendconnection",authmiddleware,controller.sendConnectionRequest);
+router.get("/get-connection",authmiddleware,controller.getReceivedConnections);
 module.exports = router;

@@ -42,15 +42,20 @@ module.exports.login = async (props) => {
       { expiresIn: "12h" }
     );
 
-    return {
-      code: 200,
-      status: true,
-      message: "Login successful",
-      response: token,
-       roleid: user.roleid, 
-        status:user.status                                 // 🔥 frontend-ku thevai
-      // userid: user.userid,
-    };
+   return {
+  code: 200,
+  status: true,
+  message: "Login successful",
+  response: token,
+  roleid: user.roleid,
+  status: user.status,
+  user: {
+    id: user.id,        // ✅ IMPORTANT
+    name: user.name,
+    email: user.email
+  }
+};
+
   } catch (error) {
     console.error("Auth Service Login Error:", error);
 

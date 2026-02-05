@@ -22,6 +22,9 @@ app.use((req, res, next) => {
   console.log("URL:", req.method, req.originalUrl);
   console.log("Headers:", req.headers["content-type"]);
   console.log("Body:", req.body);
+  console.log("RAW HEADERS 👉", req.headers);
+console.log("AUTH HEADER 👉", req.headers.authorization);
+
   next();
 });
 
