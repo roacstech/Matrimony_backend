@@ -1,16 +1,44 @@
-const adminService = require("../services");
+const adminService = require("../services/index");
 
-exports.getPendingForms = async (req, res) => {
-  const data = await adminService.getPending();
-  res.json(data);
+module.exports.getPendingForms = async (req, res) => {
+  try {
+    const result = await adminService.getPendingForms();
+
+    return res.status(200).json({
+      success: true,
+      message: "Pending forms fetched successfully",
+      data: result
+    });
+  } catch (error) {
+    console.error("Get Pending Forms Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch pending forms"
+    });
+  }
 };
 
-exports.approveUserForm = async (req, res) => {
-  await adminService.approve(req.params.formId);
-  res.json({ success: true });
-};
+// REJECT USER
+module.exports.rejectUser = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { reason } = req.body;
 
-exports.rejectUserForm = async (req, res) => {
-  await adminService.reject(req.params.formId, req.body.reason);
-  res.json({ success: true });
+    const result = await adminService.rejectUser(userId, reason);
+
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "User rejected successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to reject user",
+    });
+  }
 };

@@ -1,45 +1,60 @@
 const db = require("../../../config/db");
-const {
-  sendApprovalMail,
-  sendRejectionMail,
-} = require("../../../utils/email");
 
-exports.getPending = async () => {
-  const [rows] = await db.query(
-    "SELECT id, full_name, email, city, country FROM user_forms WHERE status='PENDING'"
-  );
-  return rows;
+module.exports.getPendingForms = async () => {
+  try {
+    const pendingForms = await db("users")
+      .where({ status: "PENDING" });
+
+    if (!pendingForms || pendingForms.length === 0) {
+      return {
+        success: false,
+        message: "No pending forms found",
+      };
+    }
+
+    return {
+      success: true,
+      message: "Pending forms fetched successfully",
+      data: pendingForms,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
 };
 
-exports.approve = async (formId) => {
-  const [[form]] = await db.query(
-    "SELECT * FROM user_forms WHERE id=?",
-    [formId]
-  );
+// REJECT USER + NOTIFICATION
 
-  await db.query(
-    "UPDATE user_forms SET status='APPROVED' WHERE id=?",
-    [formId]
-  );
 
-  await db.query(
-    "UPDATE users SET status='APPROVED' WHERE id=?",
-    [form.user_id]
-  );
+module.exports.rejectUser = async (userId) => {
+  try {
+    // 🔴 ONLY status update using ID
+    const updated = await db("users")
+      .where({ id: userId })
+      .update({
+        status: "REJECTED",
+      });
 
-  await sendApprovalMail(form.email, form.full_name);
-};
+    if (!updated) {
+      return {
+        success: false,
+        message: "User not found",
+      };
+    }
 
-exports.reject = async (formId, reason) => {
-  const [[form]] = await db.query(
-    "SELECT * FROM user_forms WHERE id=?",
-    [formId]
-  );
+    // 🔔 Notification insert (optional but recommended)
+    await db("notifications").insert({
+      user_id: userId, // users.id
+      type: "ADMIN_REJECT",
+      message: "Your profile was rejected by admin",
+      is_read: 0,
+      created_at: new Date(),
+    });
 
-  await db.query(
-    "UPDATE user_forms SET status='REJECTED' WHERE id=?",
-    [formId]
-  );
-
-  await sendRejectionMail(form.email, form.full_name, reason);
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
 };
