@@ -6,6 +6,7 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const db = require("./config/db");
 const routes = require("./routes");
+const path = require("path");
 
 const app = express();
 
@@ -29,6 +30,7 @@ console.log("AUTH HEADER 👉", req.headers.authorization);
 });
 
 app.use("/api",routes)
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 
 

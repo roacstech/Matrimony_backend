@@ -18,12 +18,16 @@ router.post(
 
 router.get("/connections",authmiddleware, controller.getVisibleConnections);
 router.get("/profile/:id",authmiddleware,controller.getUserProfile);
-router.post("/sendconnection",authmiddleware,controller.sendConnectionRequest);
+router.post("/connection",authmiddleware,controller.sendConnectionRequest);
 router.get("/get-connection",authmiddleware,controller.getReceivedConnections);
+
+
 
 //my connection
 
 router.get("/connections/received",authmiddleware, controller.getReceivedConnections);
+
+//medhod change
 router.get("/connections/sent",authmiddleware, controller.getSentConnections);
 
 router.post("/connections/:id/accept",authmiddleware, controller.acceptConnection);
@@ -36,15 +40,16 @@ router.delete("/connections/:id",authmiddleware, controller.withdrawConnection)
 router.get("/profile",authmiddleware, controller.getMyProfile);
 
 // UPDATE profile (text fields)
-router.put("/updateprofile",authmiddleware, controller.updateProfile);
+router.put("/profile",authmiddleware, controller.updateProfile);
 
-// // UPDATE photo
+// UPDATE photo
 // router.put(
 //   "/profile/photo",
 //   authmiddleware,
-//   upload.single("photo"),authmiddleware,
+//   upload.single("photo"),
 //   controller.updatePhoto
 // );
+
 
 // // UPDATE horoscope
 // router.put(

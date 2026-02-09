@@ -340,63 +340,97 @@ module.exports.getUserProfile = async (userid) => {
   }
 };
 
-module.exports.sendConnectionRequest = async (fromUser, toUser) => {
+module.exports.sendConnectionRequest = async (fromUserId, profileId) => {
   try {
-    const exists = await db("connections")
-      .where({ from_user: fromUser, to_user: toUser })
+    // 1. Get profile → user mapping
+    const profile = await db("profiles")
+      .select("user_id")
+      .where({ id: profileId })
       .first();
 
-    if (exists) {
+    if (!profile || !profile.user_id ) {
       return {
         success: false,
-        message: "Already requested"
+        message: "Profile not found or inactive"
       };
     }
 
+    const toUserId = profile.user_id;
+
+  
+    // 3. Ensure target user exists
+    const userExists = await db("users")
+      .where({ id: toUserId, is_active: 1 })
+      .first();
+
+    if (!userExists) {
+      return {
+        success: false,
+        message: "User does not exist"
+      };
+    }
+
+    // 4. Check duplicate request
+    const existing = await db("connections")
+      .where({
+        from_user: fromUserId,
+        to_user: toUserId
+      })
+      .first();
+
+    if (existing) {
+      return {
+        success: false,
+        message: "Connection request already sent"
+      };
+    }
+
+    // 5. Create request
     await db("connections").insert({
-      from_user: fromUser,
-      to_user: toUser
+      from_user: fromUserId,
+      to_user: toUserId,
+      status: "Sent"
     });
 
-    return {
-      success: true
-    };
+    return { success: true };
 
-  } catch (err) {
+  } catch (error) {
     return {
       success: false,
-      message: err.message
+      message: error.message
     };
   }
 };
 
 
 
-module.exports.getReceivedConnections = async (userId) => {
-  try {
-    const rows = await db("connections as c")
-      .join("users as u", "u.id", "c.from_user")
-      .select(
-        "c.id as connectionId",
-        "u.id as userId",
-        "u.name",
-        "u.email",
-        "c.created_at"
-      )
-      .where("c.to_user", userId);
 
-    return {
-      success: true,
-      data: rows
-    };
 
-  } catch (err) {
-    return {
-      success: false,
-      message: err.message
-    };
-  }
-};
+// module.exports.getReceivedConnections = async (userId) => {
+//   try {
+//     const rows = await db("connections as c")
+//       .join("users as u", "u.id", "c.from_user")
+//       .select(
+//         "c.id as connectionId",
+//         "u.id as userId",
+//         "u.name",
+//         "u.email",
+//         "c.created_at"
+//       )
+//       .where("c.to_user", userId);
+
+//     return {
+//       success: true,
+//       data: rows
+//     };
+
+//   } catch (err) {
+//     return {
+//       success: false,
+//       message: err.message
+//     };
+//   }
+// };
 
 
 /**
@@ -418,7 +452,6 @@ module.exports.getReceivedConnections = async (userId) => {
         "p.city",
         "p.privacy"
       )
-      .where("c.to_user", userId);
 
     return { success: true, data: rows };
   } catch (err) {
@@ -431,25 +464,34 @@ module.exports.getReceivedConnections = async (userId) => {
  */
 module.exports.getSentConnections = async (userId) => {
   try {
-    const rows = await db("connections as c")
-      .join("profiles as p", "p.user_id", "c.to_user")
+    const connections = await db("connections as c")
+      .leftJoin("profiles as p", "p.user_id", "c.to_user")
       .select(
         "c.id as connectionId",
         "c.status",
         "c.created_at",
-        "p.user_id",
-        "p.full_name",
+
+        "c.to_user as userId",
+        "p.full_name as fullName",
         "p.gender",
         "p.occupation",
         "p.city"
       )
       .where("c.from_user", userId);
 
-    return { success: true, data: rows };
+    return {
+      success: true,
+      data: connections
+    };
+
   } catch (err) {
-    return { success: false, message: err.message };
+    return {
+      success: false,
+      message: err.message
+    };
   }
 };
+
 
 /**
  * ACCEPT
@@ -480,6 +522,19 @@ module.exports.acceptConnection = async (connectionId, userId) => {
 /**
  * REJECT
  */
+
+
+// ✅ ADD THIS FUNCTION
+const isExpired = (createdAt) => {
+  const EXPIRY_HOURS = 24;
+
+  const now = new Date();
+  const created = new Date(createdAt);
+
+  const diffInHours = (now - created) / (1000 * 60 * 60);
+  return diffInHours > EXPIRY_HOURS;
+};
+
 module.exports.rejectConnection = async (connectionId, userId) => {
   try {
     const connection = await db("connections")
@@ -487,25 +542,40 @@ module.exports.rejectConnection = async (connectionId, userId) => {
       .first();
 
     if (!connection) {
-      return { success: false, message: "Connection not found" };
+      return {
+        success: false,
+        message: "Connection not found"
+      };
+    }
+
+     // ✅ ADD THIS CHECK
+    if (connection.status === "Rejected") {
+      return {
+        success: false,
+        message: "Connection already rejected"
+      };
     }
 
     if (isExpired(connection.created_at)) {
       return {
         success: false,
-        message: "Connection request expired",
+        message: "Connection request expired"
       };
     }
 
-    await db("connections")
-      .where({ id: connectionId })
-      .update({ status: "Rejected" });
+    // await db("connections")
+    //   .where({ id: connectionId })
+    //   .update({ status: "Rejected" });
 
     return { success: true };
   } catch (err) {
-    return { success: false, message: err.message };
+    return {
+      success: false,
+      message: err.message
+    };
   }
 };
+
 
 
 /**
@@ -543,26 +613,83 @@ module.exports.withdrawConnection = async (connectionId, userId) => {
 /**
  * GET MY PROFILE
  */
-exports.getMyProfile = async (userId) => {
-  const profile = await db("profiles")
-    .where({ user_id: userId })
-    .first();
+module.exports.getMyProfile = async (userId) => {
+  console.log("userId",userId)
+  try {
+    const profile = await db("profiles")
+      .where({
+        user_id: userId,
+        is_active: 1
+      })
+    
+      .first();
 
-  if (!profile) {
-    return { success: false, message: "Profile not found" };
+    if (!profile) {
+      return {
+        success: false,
+        message: "Profile not found"
+      };
+    }
+
+    return {
+      success: true,
+      data: {
+        user_id: userId,
+
+        id: profile.id,
+        fullName: profile.full_name,
+        gender: profile.gender,
+        dob: profile.dob,
+        birthTime: profile.birth_time,
+        maritalStatus: profile.marital_status,
+        education: profile.education,
+        occupation: profile.occupation,
+        income: profile.income,
+        email: profile.email,
+
+        family: {
+          fatherName: profile.father_name,
+          motherName: profile.mother_name,
+          grandfatherName: profile.grandfather_name,
+          grandmotherName: profile.grandmother_name,
+          siblings: profile.siblings
+        },
+
+        astrology: {
+          raasi: profile.raasi,
+          star: profile.star,
+          dosham: profile.dosham
+        },
+
+        horoscope: {
+          uploaded: profile.horoscope_uploaded === 1,
+          fileName: profile.horoscope_file_name,
+          fileUrl: profile.horoscope_file_url
+        },
+
+        religion: profile.religion,
+        caste: profile.caste,
+
+        address: {
+          address: profile.address,
+          city: profile.city,
+          country: profile.country
+        },
+
+        privacy: profile.privacy,
+        isPublic: profile.is_public === 1,
+        photo: profile.photo,
+        status: profile.status,
+        createdAt: profile.created_at
+      }
+    };
+
+  } catch (err) {
+    return {
+      success: false,
+      message: err.message
+    };
   }
-
-  return {
-    success: true,
-    data: {
-      ...profile,
-      horoscope: {
-        uploaded: profile.horoscope_uploaded === 1,
-        fileUrl: profile.horoscope_file_url,
-        fileName: profile.horoscope_file_name,
-      },
-    },
-  };
 };
 
 /**
@@ -645,14 +772,23 @@ exports.updateProfile = async (userId, props = {}) => {
  * UPDATE PHOTO
  */
 exports.updatePhoto = async (userId, file) => {
-  await db("profiles")
-    .where({ user_id: userId })
-    .update({
-      photo: `/uploads/photos/${file.filename}`,
-    });
+  try {
+    await db("profiles")
+      .where({ user_id: userId })
+      .update({
+        photo: `/uploads/photos/${file.filename}`
+      });
 
-  return { success: true };
+    return { success: true };
+
+  } catch (err) {
+    return {
+      success: false,
+      message: err.message
+    };
+  }
 };
+
 
 /**
  * UPDATE HOROSCOPE
