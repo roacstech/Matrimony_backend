@@ -20,28 +20,28 @@ router.get("/connections",authmiddleware, controller.getVisibleConnections);
 
 router.get("/profile/:id",authmiddleware,controller.getUserProfile);
 router.post("/connection",authmiddleware,controller.sendConnectionRequest);
-router.get("/get-connection",authmiddleware,controller.getReceivedConnections);
+// router.get("/get-connection",authmiddleware,controller.getReceivedConnections);
 
 
 
 //my connection
 
-router.get("/connections/received",authmiddleware, controller.getReceivedConnections);
+// router.get("/connections/received",authmiddleware, controller.getReceivedConnections);
 
-//medhod change
-router.get("/connections/sent",authmiddleware, controller.getSentConnections);
+// //medhod change
+// router.get("/connections/sent",authmiddleware, controller.getSentConnections);
 
-router.post("/connections/:id/accept",authmiddleware, controller.acceptConnection);
-router.post("/connections/:id/reject",authmiddleware,controller.rejectConnection);
+// router.post("/connections/:id/accept",authmiddleware, controller.acceptConnection);
+// router.put("/connections/:id/reject",authmiddleware,controller.rejectConnection);
 
-router.delete("/connections/:id",authmiddleware, controller.withdrawConnection)
+// router.delete("/connections/:id",authmiddleware, controller.withdrawConnection)
 
 
 // GET my profile
-router.get("/profile",authmiddleware, controller.getMyProfile);
+// router.get("/profile",authmiddleware, controller.getMyProfile);
 
-// UPDATE profile (text fields)
-router.put("/profile",authmiddleware, controller.updateProfile);
+// // UPDATE profile (text fields)
+// router.put("/profile",authmiddleware, controller.updateProfile);
 
 // UPDATE photo
 // router.put(
@@ -62,6 +62,37 @@ router.put("/profile",authmiddleware, controller.updateProfile);
 
 // // UPDATE privacy
 // router.patch("/profile/privacy", authmiddleware, controller.updatePrivacy);
+
+
+
+//My connection user
+
+
+/// GET RECEIVED CONNECTIONS
+router.get(
+  "/connections/received",
+  authmiddleware,
+  controller.getReceivedConnections
+);
+
+
+// 📤 Get Sent Connections
+router.get(
+  "/connections/sent",
+  authmiddleware,
+  controller.getSentConnections
+);
+
+// Accept Connection
+router.post("/connections/:id/accept", authmiddleware, controller.acceptConnection);
+
+// ❌ Reject Connection
+router.post(
+  "/connections/:id/reject",
+  authmiddleware,
+  controller.rejectConnection
+);
+
 
 
 module.exports = router;

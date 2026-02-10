@@ -113,103 +113,103 @@ module.exports.sendConnectionRequest = async (req, res) => {
 
 
 
+// //User Reject conn
+
+// module.exports.rejectConnection = async (req, res) => {
+//   try {
+// const  userId  = req.user.id
+//     const { id: connectionId } = req.params;
+
+//     // if (!connectionId) {
+//     //   return res.status(400).json({
+//     //     success: false,
+//     //     message: "Invalid request"
+//     //   });
+//     // }
+
+//     const result = await service.rejectConnection(connectionId, userId);
+
+//     if (!result.success) {
+//       return res.status(400).json(result);
+//     }
+
+//     res.json({
+//       success: true,
+//       message: "Connection rejected"
+//     });
+
+//   } catch (err) {
+//     res.status(500).json({
+//       success: false,
+//       message: err.message
+//     });
+//   }
+// };
 
 
-module.exports.rejectConnection = async (req, res) => {
-  try {
-const  userId  = req.user.id
-    const { id: connectionId } = req.params;
-
-    // if (!connectionId) {
-    //   return res.status(400).json({
-    //     success: false,
-    //     message: "Invalid request"
-    //   });
-    // }
-
-    const result = await service.rejectConnection(connectionId, userId);
-
-    if (!result.success) {
-      return res.status(400).json(result);
-    }
-
-    res.json({
-      success: true,
-      message: "Connection rejected"
-    });
-
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: err.message
-    });
-  }
-};
-
-
-/**
- * RECEIVED
- */
-module.exports.getReceivedConnections = async (req, res) => {
-  const result = await service.getReceivedConnections(req.user.id);
-  console.log(result);
+// /**
+//  * RECEIVED
+//  */
+// module.exports.getReceivedConnections = async (req, res) => {
+//   const result = await service.getReceivedConnections(req.user.id);
+//   console.log(result);
   
-  if (!result.success) return res.status(400).json(result);
-  res.json(result);
-};
+//   if (!result.success) return res.status(400).json(result);
+//   res.json(result);
+// };//
 
 /**
  * SENT
  */
-module.exports.getSentConnections = async (req, res) => {
-  try {
-    const result = await service.getSentConnections(req.user.id);
+// module.exports.getSentConnections = async (req, res) => {
+//   try {
+//     const result = await service.getSentConnections(req.user.id);
 
-    if (!result.success) {
-      return res.status(400).json(result);
-    }
+//     if (!result.success) {
+//       return res.status(400).json(result);
+//     }
 
-    return res.json(result);
+//     return res.json(result);
 
-  } catch (err) {
-    return res.status(500).json({
-      success: false,
-      message: err.message
-    });
-  }
-};
+//   } catch (err) {
+//     return res.status(500).json({
+//       success: false,
+//       message: err.message
+//     });
+//   }
+// };
 
 
 /**
  * ACCEPT
  */
 // controller
-module.exports.acceptConnection = async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const connectionId = req.params.id;
+// module.exports.acceptConnection = async (req, res) => {
+//   try {
+//     const userId = req.user.id;
+//     const connectionId = req.params.id;
 
-    const result = await service.acceptConnection(connectionId, userId);
+//     const result = await service.acceptConnection(connectionId, userId);
 
-    if (!result.success) {
-      return res.status(400).json(result);
-    }
+//     if (!result.success) {
+//       return res.status(400).json(result);
+//     }
 
-    res.json({ success: true, message: "Connection accepted" });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-};
+//     res.json({ success: true, message: "Connection accepted" });
+//   } catch (err) {
+//     res.status(500).json({ success: false, message: err.message });
+//   }
+// };
 
 
-/**
- * REJECT
- */
-module.exports.rejectConnection = async (req, res) => {
-  const result = await service.rejectConnection(req.params.id, req.user.id);
-  if (!result.success) return res.status(400).json(result);
-  res.json({ success: true, message: "Connection rejected" });
-};
+// /**
+//  * REJECT
+//  */
+// module.exports.rejectConnection = async (req, res) => {
+//   const result = await service.rejectConnection(req.params.id, req.user.id);
+//   if (!result.success) return res.status(400).json(result);
+//   res.json({ success: true, message: "Connection rejected" });
+// };
 
 /**
  * WITHDRAW
@@ -240,24 +240,24 @@ module.exports.withdrawConnection = async (req, res) => {
 /**
  * GET MY PROFILE
  */
-module.exports.getMyProfile = async (req, res) => {
-  try {
-    const result = await service.getMyProfile(req.user.id);
-    console.log("test user.id",req.user.id)
+// module.exports.getMyProfile = async (req, res) => {
+//   try {
+//     const result = await service.getMyProfile(req.user.id);
+//     console.log("test user.id",req.user.id)
 
-    if (!result.success) {
-      return res.status(404).json(result);
-    }
+//     if (!result.success) {
+//       return res.status(404).json(result);
+//     }
 
-    res.json(result);
+//     res.json(result);
 
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: err.message
-    });
-  }
-};
+//   } catch (err) {
+//     res.status(500).json({
+//       success: false,
+//       message: err.message
+//     });
+//   }
+// };
 
 
 /**
@@ -265,110 +265,222 @@ module.exports.getMyProfile = async (req, res) => {
  */
 
 
-  exports.updateProfile = async (req, res) => {
-  try {
-    console.log("REQ.USER 👉", req.user);
+//   exports.updateProfile = async (req, res) => {
+//   try {
+//     console.log("REQ.USER 👉", req.user);
 
-    const userId = req.user.id;
-    const body = req.body;
+//     const userId = req.user.id;
+//     const body = req.body;
 
-    if (!userId) {
-      return res.status(400).json({
-        success: false,
-        message: "User id missing",
-      });
-    }
+//     if (!userId) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "User id missing",
+//       });
+//     }
 
-    if (!body || Object.keys(body).length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Request body is empty",
-      });
-    }
+//     if (!body || Object.keys(body).length === 0) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Request body is empty",
+//       });
+//     }
 
-    const result = await service.updateProfile(userId, body);
+//     const result = await service.updateProfile(userId, body);
 
-    if (!result.success) {
-      return res.status(400).json(result);
-    }
+//     if (!result.success) {
+//       return res.status(400).json(result);
+//     }
 
-    return res.json({
-      success: true,
-      message: "Profile updated successfully",
-    });
+//     return res.json({
+//       success: true,
+//       message: "Profile updated successfully",
+//     });
 
-  } catch (err) {
-    console.error("UPDATE PROFILE ERROR 👉", err);
-    return res.status(500).json({
-      success: false,
-      message: "Server error",
-    });
-  }
-};
+//   } catch (err) {
+//     console.error("UPDATE PROFILE ERROR 👉", err);
+//     return res.status(500).json({
+//       success: false,
+//       message: "Server error",
+//     });
+//   }
+// };
 
 
 
 /**
  * UPDATE PHOTO
- */
-exports.updatePhoto = async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        message: "No photo uploaded"
-      });
-    }
+//  */
+// exports.updatePhoto = async (req, res) => {
+//   try {
+//     if (!req.file) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "No photo uploaded"
+//       });
+//     }
 
-    const result = await service.updatePhoto(
-      req.user.id,
-      req.file
-    );
+//     const result = await service.updatePhoto(
+//       req.user.id,
+//       req.file
+//     );
 
-    if (!result.success) {
-      return res.status(400).json(result);
-    }
+//     if (!result.success) {
+//       return res.status(400).json(result);
+//     }
 
-    res.json({
-      success: true,
-      message: "Photo updated successfully"
-    });
+//     res.json({
+//       success: true,
+//       message: "Photo updated successfully"
+//     });
 
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: err.message
-    });
-  }
-};
+//   } catch (err) {
+//     res.status(500).json({
+//       success: false,
+//       message: err.message
+//     });
+//   }
+// };
 
 
 /**
  * UPDATE HOROSCOPE
  */
-exports.updateHoroscope = async (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ success: false, message: "No horoscope uploaded" });
-  }
+// exports.updateHoroscope = async (req, res) => {
+//   if (!req.file) {
+//     return res.status(400).json({ success: false, message: "No horoscope uploaded" });
+//   }
 
-  const result = await service.updateHoroscope(req.user.id, req.file);
-  if (!result.success) return res.status(400).json(result);
+//   const result = await service.updateHoroscope(req.user.id, req.file);
+//   if (!result.success) return res.status(400).json(result);
 
-  res.json({ success: true, message: "Horoscope updated" });
-};
+//   res.json({ success: true, message: "Horoscope updated" });
+// };
 
 /**
  * UPDATE PRIVACY
  */
-exports.updatePrivacy = async (req, res) => {
-  const { privacy } = req.body;
+// exports.updatePrivacy = async (req, res) => {
+//   const { privacy } = req.body;
 
-  if (!["Public", "Private"].includes(privacy)) {
-    return res.status(400).json({ success: false, message: "Invalid privacy" });
+//   if (!["Public", "Private"].includes(privacy)) {
+//     return res.status(400).json({ success: false, message: "Invalid privacy" });
+//   }
+
+//   const result = await service.updatePrivacy(req.user.id, privacy);
+//   if (!result.success) return res.status(400).json(result);
+
+//   res.json({ success: true, message: "Privacy updated" });
+// };
+
+
+// My connection 
+
+module.exports.getReceivedConnections = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const data = await service.getReceivedConnections(userId);
+
+    return res.status(200).json({
+      success: true,
+      data,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
+};
 
-  const result = await service.updatePrivacy(req.user.id, privacy);
-  if (!result.success) return res.status(400).json(result);
 
-  res.json({ success: true, message: "Privacy updated" });
+/// GET SENTCONNECTION 
+module.exports.getSentConnections = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const data = await service.getSentConnections(userId);
+
+    return res.status(200).json({
+      success: true,
+      data,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+//// GET ACEPET CONNECCTIONS
+
+
+
+module.exports.acceptConnection = async (req, res) => {
+  try {
+  
+
+    const connectionId = parseInt(req.params.id);
+    console.log("test connection",connectionId);
+    const userId = req.user.id;
+  console.log("ID:", req.params.id);
+console.log("USER:", req.user.id);
+
+    if (!connectionId) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid connection id",
+      });
+    }
+
+    const result = await service.acceptConnection(connectionId, userId);
+    
+
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+
+    return res.status(200).json(result);
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+///REJECT CONNECTIONS
+
+exports.rejectConnection = async (req, res) => {
+  try {
+    const connectionId = req.params.id;
+    const userId = req.user.id; // token user (to_user)
+
+    const result = await service.rejectConnection(
+      connectionId,
+      userId
+    );
+
+    if (!result) {
+      return res.status(400).json({
+        success: false,
+        message: "Connection not found or already processed",
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: "Connection rejected successfully",
+    });
+  } catch (err) {
+    console.error("Reject connection error:", err);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
 };
