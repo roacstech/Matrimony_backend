@@ -1,98 +1,82 @@
 const express = require("express");
 const router = express.Router();
 const controller = require("../controller/index");
-const upload = require("../../../middleware/upload"); // 👈 ADD THIS
-const authmiddleware = require("../../../middleware/authmiddleware");
+const upload = require("../../../middleware/upload");
+const path=require("path") // 👈 ADD THIS
+const authMiddleware= require("../../../middleware/authmiddleware")
 
 router.post(
   "/form/submit",
-  authmiddleware,
+  authMiddleware,
   upload.fields([
     { name: "photo", maxCount: 1 },
     { name: "horoscope", maxCount: 1 },
   ]),
-  controller.submitProfile
+  controller.submitProfile,
 );
 
 //connection card
 
-router.get("/connections",authmiddleware, controller.getVisibleConnections);
+router.get("/connections", authMiddleware, controller.getVisibleConnections);
 
-router.get("/profile/:id",authmiddleware,controller.getUserProfile);
-router.post("/connection",authmiddleware,controller.sendConnectionRequest);
-// router.get("/get-connection",authmiddleware,controller.getReceivedConnections);
+router.get("/profile", authMiddleware, controller.getUserProfile);
 
-
-
-//my connection
-
-// router.get("/connections/received",authmiddleware, controller.getReceivedConnections);
-
-// //medhod change
-// router.get("/connections/sent",authmiddleware, controller.getSentConnections);
-
-// router.post("/connections/:id/accept",authmiddleware, controller.acceptConnection);
-// router.put("/connections/:id/reject",authmiddleware,controller.rejectConnection);
-
-// router.delete("/connections/:id",authmiddleware, controller.withdrawConnection)
-
-
-// GET my profile
-// router.get("/profile",authmiddleware, controller.getMyProfile);
-
-// // UPDATE profile (text fields)
-// router.put("/profile",authmiddleware, controller.updateProfile);
-
-// UPDATE photo
-// router.put(
-//   "/profile/photo",
-//   authmiddleware,
-//   upload.single("photo"),
-//   controller.updatePhoto
-// );
-
-
-// // UPDATE horoscope
-// router.put(
-//   "/profile/horoscope",
-//   authmiddleware,
-//   upload.single("horoscope"),authmiddleware,
-//   controller.updateHoroscope
-// );
-
-// // UPDATE privacy
-// router.patch("/profile/privacy", authmiddleware, controller.updatePrivacy);
-
-
+router.post("/connection", authMiddleware, controller.sendConnectionRequest);
 
 //My connection user
-
 
 /// GET RECEIVED CONNECTIONS
 router.get(
   "/connections/received",
-  authmiddleware,
-  controller.getReceivedConnections
+  authMiddleware,
+  controller.getReceivedConnections,
 );
 
-
-// 📤 Get Sent Connections
-router.get(
-  "/connections/sent",
-  authmiddleware,
-  controller.getSentConnections
-);
+// 📤 Get Sent Connections0000
+router.get("/connections/sent", authMiddleware, controller.getSentConnections);
 
 // Accept Connection
-router.post("/connections/:id/accept", authmiddleware, controller.acceptConnection);
+router.post(
+  "/connections/:id/accept",
+  authMiddleware,
+  controller.acceptConnection,
+);
 
 // ❌ Reject Connection
 router.post(
   "/connections/:id/reject",
-  authmiddleware,
-  controller.rejectConnection
+  authMiddleware,
+  controller.rejectConnection,
 );
 
 
 
+// update profile
+router.put("/profile/update", authMiddleware,controller.updateUserProfile);
+
+
+const safeUploadProfilePhoto =
+  typeof controller.uploadProfilePhoto === "function"
+    ? controller.uploadProfilePhoto
+    : (req, res) =>
+        res.status(501).json({
+          success: false,
+          message: "Profile photo upload not implemented",
+        });
+
+// Update  Photo
+
+router.put(
+  "/profile/photo",
+  authMiddleware,
+  upload.single("photo"),
+  safeUploadProfilePhoto
+);
+
+
+
+
 module.exports = router;
+
+
+

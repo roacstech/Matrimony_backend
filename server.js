@@ -5,12 +5,12 @@ const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const db = require("./config/db");
-const routes = require("./routes");
+const routes = require("./routes/index");
 const path = require("path");
 
 const app = express();
 
-app.use("/uploads", express.static(path.join(__dirname, "../uploads/photos")));       
+app.use("/uploads", express.static(path.join(__dirname, "")));       
 
 
 app.use(cors({
