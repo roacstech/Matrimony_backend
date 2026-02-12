@@ -929,7 +929,6 @@ module.exports.sendConnectionRequest = async (fromUserId, profileId) => {
       .first();
 
     if (!profile || !profile.user_id) {
-    if (!profile || !profile.user_id) {
       return {
         success: false,
         message: "Profile not found or inactive",
