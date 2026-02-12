@@ -137,18 +137,30 @@ module.exports.getPendingUsers = async () => {
   }
 };
 
-module.exports.adminApproveUser = async (profileId) => {
+module.exports.adminApproveUser = async (userId) => {
   try {
-    const profile = await db("profiles").where({ id: profileId }).first();
-    if (!profile) return { success: false, message: "Profile not found" };
+    const id = Number(userId);
 
-    const user = await db("users").where({ id: profile.user_id }).first();
-    if (!user) return { success: false, message: "User not found" };
+    // 1️⃣ find profile using user_id
+    const profile = await db("profiles").where({ user_id: id }).first();
 
-    await db("profiles").where({ id: profileId }).update({ status: "ACTIVE" });
-    await db("users").where({ id: user.id }).update({ status: "ACTIVE" });
+    if (!profile) {
+      return { success: false, message: "Profile not found" };
+    }
 
-    // 📧 welcome mail
+    // 2️⃣ find user
+    const user = await db("users").where({ id }).first();
+
+    if (!user) {
+      return { success: false, message: "User not found" };
+    }
+
+    // 3️⃣ update both tables
+    await db("profiles").where({ user_id: id }).update({ status: "ACTIVE" });
+
+    await db("users").where({ id }).update({ status: "ACTIVE" });
+
+    // 4️⃣ send mail
     await sendMail({
       to: user.email,
       subject: "Welcome to Kalyanamalai 💍",
@@ -162,37 +174,59 @@ module.exports.adminApproveUser = async (profileId) => {
   }
 };
 
-module.exports.adminRejectUser = async (profileId, reason) => {
+module.exports.adminRejectUser = async (userId, reason) => {
   try {
-    console.log("SERVICE profileId 👉", profileId);
+    const id = Number(userId);
+
+    console.log("SERVICE profileId 👉", id);
     console.log("SERVICE reason 👉", reason);
-    const profile = await db("profiles").where({ id: profileId }).first();
-    console.log("PROFILE 👉", profile);
-    if (!profile) return { success: false, message: "Profile not found" };
 
-    const user = await db("users").where({ id: profile.user_id }).first();
-    console.log("USER 👉", user);
-    if (!user) return { success: false, message: "User not found" };
+    // 1️⃣ Get profile
+    const profile = await db("profiles")
+      .where({ user_id :id })
+      .first();
 
+    if (!profile) {
+      return { success: false, message: "Profile not found" };
+    }
+
+    // 2️⃣ Get user
+    const user = await db("users")
+      .where({ id: profile.user_id })
+      .first();
+
+    if (!user) {
+      return { success: false, message: "User not found" };
+    }
+
+    // 3️⃣ Update DB first (important for speed)
     await db("profiles")
-      .where({ id: profileId })
+      .where({ id })
       .update({ status: "REJECTED" });
-    await db("users").where({ id: user.id }).update({ status: "REJECTED" });
 
-    // 📧 reject mail
-    await sendMail({
-      to: user.email,
-      subject: "Profile Update – Kalyanamalai",
-      html: rejectTemplate(profile.full_name, reason),
+    await db("users")
+      .where({ id: user.id })
+      .update({ status: "REJECTED" });
+
+    // 4️⃣ Send mail in background (non-blocking)
+    setImmediate(() => {
+      sendMail({
+        to: user.email,
+        subject: "Profile Update – Kalyanamalai",
+        html: rejectTemplate(profile.full_name, reason),
+      }).catch((err) => {
+        console.error("Mail error 👉", err);
+      });
     });
 
     return { success: true };
+
   } catch (err) {
     console.error("SERVICE ERROR 👉", err);
-    console.error("Reject error:", err);
     return { success: false, message: "Reject failed" };
   }
 };
+
 
 // 👁 TOGGLE VISIBILITY
 // services/admin.service.js
