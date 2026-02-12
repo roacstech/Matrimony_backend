@@ -91,14 +91,11 @@
 const express = require("express");
 const router = express.Router();
 const controller = require("../controller/index");
-// <<<<<<< HEAD
-// const upload = require("../../../middleware/upload"); // 👈 ADD THIS
-// const authMiddleware = require("../../../middleware/authmiddleware");
+const upload = require("../../../middleware/upload"); // 👈 ADD THIS
+const authMiddleware = require("../../../middleware/authmiddleware");
 // =======
-// const upload = require("../../../middleware/upload");
-// const path=require("path") // 👈 ADD THIS
+const path=require("path") // 👈 ADD THIS
 // const authMiddleware= require("../../../middleware/authmiddleware")
-// >>>>>>> c5a6678e50b2f4535160c6ca054d6580069718e4
 
 router.post(
   "/form/submit",
