@@ -2,11 +2,13 @@
   "name": "backend",
   "version": "1.0.0",
   "main": "server.js",
-  "scripts": {
-  "start": "pm2 restart backend || pm2 start server.js --name backend",
-  "dev": "nodemon server.js",
-  "build": "echo 'No build step required'"
-},
+ "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "cross-env NODE_ENV=OTDEV nodemon index.js",
+    "live": "cross-env NODE_ENV=OTLIVE nodemon index.js",
+    "start": "nodemon index.js",
+    "build": "echo \"No build step required for backend\""
+  },
   "dependencies": {
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
