@@ -6,7 +6,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "cross-env NODE_ENV=OTDEV nodemon index.js",
     "live": "cross-env NODE_ENV=OTLIVE nodemon index.js",
-    "start": "nodemon index.js",
+    "start": "node server.js",
     "build": "echo \"No build step required for backend\""
   },
   "dependencies": {
