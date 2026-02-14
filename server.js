@@ -10,7 +10,7 @@ const path = require("path");
 
 const app = express();
 
-app.use('/uploads', express.static('uploads'));
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 app.use(cors());
 app.options("*", cors());
