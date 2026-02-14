@@ -3,12 +3,11 @@
   "version": "1.0.0",
   "main": "server.js",
  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "cross-env NODE_ENV=OTDEV nodemon index.js",
-    "live": "cross-env NODE_ENV=OTLIVE nodemon index.js",
-    "start": "node server.js",
-    "build": "echo \"No build step required for backend\""
-  },
+  "start": "node server.js",
+  "dev": "cross-env NODE_ENV=OTDEV nodemon server.js",
+  "live": "cross-env NODE_ENV=OTLIVE nodemon server.js",
+  "build": "echo \"No build step required for backend\""
+},
   "dependencies": {
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
