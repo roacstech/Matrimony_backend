@@ -8,6 +8,7 @@ module.exports.login = async (props) => {
   try {
     let query = db("users");
 
+    // Email or Phone validation
     if (email) {
       query = query.where("email", email);
     } else if (phone) {
@@ -22,6 +23,10 @@ module.exports.login = async (props) => {
 
     const user = await query.first();
 
+    console.log("❤️",user);
+    
+
+    // User not found
     if (!user) {
       return {
         code: 400,
@@ -30,15 +35,16 @@ module.exports.login = async (props) => {
       };
     }
 
-    // 🔴 IMPORTANT BLOCK
-if (user.status !== "ACTIVE") {
-  return {
-    code: 403,
-    status: false,
-    message: "Your account is not active. Please contact admin.",
-  };
-}
+    // 🚫 Restrict ONLY rejected users
+    if (user.status === "REJECT" || user.status === "INACTIVE") {
+      return {
+        code: 403,
+        status: false,
+        message: "Your account is not active. Please contact admin.",
+      };
+    }
 
+    // Password check (plain text - not recommended for production)
     const isMatch = password === user.password;
     if (!isMatch) {
       return {
@@ -48,6 +54,7 @@ if (user.status !== "ACTIVE") {
       };
     }
 
+    // JWT Token
     const token = jwt.sign(
       {
         userid: user.id,
