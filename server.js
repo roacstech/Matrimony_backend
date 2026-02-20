@@ -10,7 +10,7 @@ const path = require("path");
 
 const app = express();
 
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use(cors());
 app.options("*", cors());
@@ -18,12 +18,12 @@ app.options("*", cors());
 app.use(express.json());
 app.use(cookieParser());
 app.use((req, res, next) => {
-  console.log("---- INCOMING REQUEST ----");
-  console.log("URL:", req.method, req.originalUrl);
-  console.log("Headers:", req.headers["content-type"]);
-  console.log("Body:", req.body);
-  console.log("RAW HEADERS 👉", req.headers);
-console.log("AUTH HEADER 👉", req.headers.authorization);
+//   console.log("---- INCOMING REQUEST ----");
+//   console.log("URL:", req.method, req.originalUrl);
+//   console.log("Headers:", req.headers["content-type"]);
+//   console.log("Body:", req.body);
+//   console.log("RAW HEADERS 👉", req.headers);
+// console.log("AUTH HEADER 👉", req.headers.authorization);
 
   next();
 });
