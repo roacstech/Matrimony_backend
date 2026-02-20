@@ -254,6 +254,13 @@ module.exports.adminToggleVisibility = async (props = {}) => {
 
     await db("profiles").where({ id }).update({ is_active: newValue });
 
+       // 3️⃣ 🔥 IMPORTANT: Update users table ALSO
+    await db("users")
+      .where({ id: profile.user_id })
+      .update({
+        status: newValue === 1 ? "ACTIVE" : "INACTIVE",
+      });
+
     return {
       success: true,
       is_active: newValue,

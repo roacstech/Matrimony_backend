@@ -30,6 +30,15 @@ module.exports.login = async (props) => {
       };
     }
 
+    // 🔴 IMPORTANT BLOCK
+if (user.status !== "ACTIVE") {
+  return {
+    code: 403,
+    status: false,
+    message: "Your account is not active. Please contact admin.",
+  };
+}
+
     const isMatch = password === user.password;
     if (!isMatch) {
       return {
