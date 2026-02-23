@@ -88,7 +88,7 @@ console.log("VERIFY SECRET:", process.env.JWT_SECRET);
       status: decoded.status,
     };
     
-    console.log("REQ test",req.user)
+    // console.log("REQ test",req.user)
     next();
   } catch (err) {
     console.error("JWT ERROR 👉", err.message);

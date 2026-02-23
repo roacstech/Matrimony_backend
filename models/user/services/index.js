@@ -143,30 +143,22 @@ module.exports.getVisibleConnections = async (userId) => {
 
 module.exports.sendConnectionRequest = async (fromUserId, profileId) => {
   try {
-    /* 1️⃣ Validate input */
     if (!fromUserId || !profileId) {
-      return {
-        success: false,
-        message: "Invalid request data",
-      };
+      return { success: false, message: "Invalid request data" };
     }
 
-    /* 2️⃣ Get TO user (profileId → user_id) */
+    // Get TO user
     const profile = await db("profiles")
       .select("user_id")
       .where({ id: profileId })
       .first();
 
     if (!profile || !profile.user_id) {
-      return {
-        success: false,
-        message: "Profile not found or inactive",
-      };
+      return { success: false, message: "Profile not found or inactive" };
     }
 
     const toUserId = profile.user_id;
 
-    /* 3️⃣ Prevent self-connection */
     if (fromUserId === toUserId) {
       return {
         success: false,
@@ -174,12 +166,9 @@ module.exports.sendConnectionRequest = async (fromUserId, profileId) => {
       };
     }
 
-    /* 4️⃣ Check existing request (business logic) */
+    // Check existing request
     const existing = await db("connections")
-      .where({
-        from_user: fromUserId,
-        to_user: toUserId,
-      })
+      .where({ from_user: fromUserId, to_user: toUserId })
       .first();
 
     if (existing) {
@@ -189,20 +178,42 @@ module.exports.sendConnectionRequest = async (fromUserId, profileId) => {
       };
     }
 
-    /* 5️⃣ Insert connection (DB safety still handled by UNIQUE key) */
+    // ✅ Restrict to 3 requests per day
+    const today = new Date();
+    const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+
+   const sentCountRow = await db("connections")
+  .where({ from_user: fromUserId, status: "Sent" })
+  .andWhereRaw("DATE(created_at) = CURDATE()")
+  .count("id as cnt")
+  .first();
+
+const sentCount = parseInt(sentCountRow.cnt, 10); // ✅ convert string to number
+
+
+console.log("sentCount",sentCount);
+
+
+if (sentCount >= 3) {
+  return {
+    success: false,
+    message: "You can only send up to 3 connection requests per day",
+  };
+}
+
+    // Insert connection
     await db("connections").insert({
       from_user: fromUserId,
       to_user: toUserId,
       status: "Sent",
     });
 
-    /* 6️⃣ Fetch FROM user profile (for response / UI) */
     const fromUserProfile = await db("profiles")
       .select("id", "full_name", "gender", "city", "country", "user_id")
       .where({ user_id: fromUserId })
       .first();
 
-    /* 7️⃣ Fetch TO user profile */
     const toUserProfile = await db("profiles")
       .select("id", "full_name", "gender", "city", "country", "user_id")
       .where({ user_id: toUserId })
@@ -215,14 +226,12 @@ module.exports.sendConnectionRequest = async (fromUserId, profileId) => {
       toUser: toUserProfile,
     };
   } catch (error) {
-    /* 8️⃣ Handle DB duplicate (race condition safety) */
     if (error.code === "ER_DUP_ENTRY") {
       return {
         success: false,
         message: "Connection request already sent and waiting",
       };
     }
-
     return {
       success: false,
       message: "Something went wrong while sending request",
@@ -279,18 +288,17 @@ module.exports.getReceivedConnections = async (userId) => {
     .join("profiles as p", "p.user_id", "c.from_user")
     .where("c.to_user", userId)
     .where("c.status", "Sent")
-   .select(
-  "c.id as connectionId",
-  "c.from_user",
-  "c.created_at",
-  "p.full_name",
-  "p.raasi",
-  "p.gender",
-  "p.income",
-  "p.occupation",
-  "p.city",
-);
-
+    .select(
+      "c.id as connectionId",
+      "c.from_user",
+      "c.created_at",
+      "p.full_name",
+      "p.raasi",
+      "p.gender",
+      "p.income",
+      "p.occupation",
+      "p.city",
+    );
 
   return rows;
 };
