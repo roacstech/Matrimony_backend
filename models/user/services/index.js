@@ -121,9 +121,51 @@ module.exports.getVisibleConnections = async (userId) => {
       };
     }
 
-    const profiles = await db("profiles")
-      .whereNot("user_id", userId)
-      .andWhere("gender", "!=", myProfile.gender);
+    const profiles = await db("profiles as p")
+      .leftJoin("connections as c", function () {
+        this.on("c.to_user", "=", "p.user_id")
+          .andOn("c.from_user", "=", db.raw("?", [userId]));
+      })
+      .select(
+        "p.id",
+        "p.full_name",
+        "p.gender",
+        "p.dob",
+        "p.birth_time",
+        "p.marital_status",
+        "p.education",
+        "p.occupation",
+        "p.income",
+        "p.email",
+        "p.father_name",
+        "p.mother_name",
+        "p.grandfather_name",
+        "p.grandmother_name",
+        "p.siblings",
+        "p.raasi",
+        "p.star",
+        "p.dosham",
+        "p.birth_place",
+        "p.horoscope_uploaded",
+        "p.horoscope_file_name",
+        "p.horoscope_file_url",
+        "p.religion",
+        "p.caste",
+        "p.address",
+        "p.city",
+        "p.country",
+        "p.privacy",
+        "p.photo",
+        "p.is_public",
+        "p.created_at",
+        "p.status",
+        "p.user_id",
+        "p.is_active",
+        // expose connection status for this user → profile
+        db.raw("COALESCE(c.status, 'Not Sent') as connection_status")
+      )
+      .whereNot("p.user_id", userId)
+      .andWhere("p.gender", "!=", myProfile.gender);
 
     return {
       success: true,
@@ -140,6 +182,7 @@ module.exports.getVisibleConnections = async (userId) => {
     };
   }
 };
+
 
 module.exports.sendConnectionRequest = async (fromUserId, profileId) => {
   try {
