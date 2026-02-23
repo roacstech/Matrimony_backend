@@ -28,7 +28,8 @@ module.exports.submitProfile = async (payload, files, user) => {
       full_name: payload.fullName,
       gender: payload.gender,
       dob: payload.dob,
-      birth_time: convertTo24Hour(payload.birthTime),
+      // birth_time: convertTo24Hour(payload.birthTime),
+      birth_time: payload.birthTime, // already HH:mm (24-hour)
       marital_status: payload.maritalStatus,
 
       education: payload.education,
@@ -108,7 +109,7 @@ module.exports.submitProfile = async (payload, files, user) => {
   }
 };
 
-//visble connections
+// //visble connections
 module.exports.getVisibleConnections = async (userId) => {
   try {
     const myProfile = await db("profiles").where({ user_id: userId }).first();
