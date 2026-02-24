@@ -35,14 +35,16 @@ module.exports.submitProfile = async (payload, files, user) => {
       education: payload.education,
       occupation: payload.occupation,
       income: payload.income,
+       workLocation: payload.work_location, // ✅ FIX
 
       email: user.email,
 
       father_name: payload.father,
       mother_name: payload.mother,
-      grandfather_name: payload.grandfather,
-      grandmother_name: payload.grandmother,
+   motherSideGrandfather: profile.mother_side_grandfather_name, // ✅ FIX
+  motherSideGrandmother: profile.mother_side_grandmother_name, // ✅ FIX
       siblings: payload.siblings,
+      remarks: payload.remarks, // ✅ FIX
 
       raasi: payload.raasi,
       star: payload.star,
@@ -92,7 +94,7 @@ module.exports.submitProfile = async (payload, files, user) => {
 
     // ✅ Update user status using userid from JWT
     await db("users").where({ id: user.id }).update({ status: "PENDING" });
-    await db("users").where({ id: user.id }).update({ status: "PENDING" });
+    // await db("users").where({ id: user.id }).update({ status: "PENDING" });
 
     return {
       success: true,
@@ -422,11 +424,15 @@ module.exports.updateUserProfile = async (props = {}) => {
       "education",
       "occupation",
       "income",
+      "work_location",
       "email",
       "father_name",
       "mother_name",
       "grandfather_name",
       "grandmother_name",
+       "motherSideGrandmother",
+       "motherSideGrandfather",
+         "workLocation",
       "siblings",
       "raasi",
       "star",
@@ -531,37 +537,37 @@ module.exports.uploadHoroscope = async ({ userId, file }) => {
 
 /// Get user profiles
 
-module.exports.getUserProfile = async (userId) => {
-  try {
-    const profile = await db("profiles").where({ user_id: userId }).first();
+// module.exports.getUserProfile = async (userId) => {
+//   try { 
+//     const profile = await db("profiles").where({ user_id: userId }).first();
 
-    if (!profile) {
-      return {
-        success: false,
-        message: "Profile not found",
-      };
-    }
+//     if (!profile) {
+//       return {
+//         success: false,
+//         message: "Profile not found",
+//       };
+//     }
 
-    return {
-      success: true,
-      data: {
-        ...profile,
-        horoscope: {
-          uploaded: profile.horoscope_uploaded === 1,
-          fileUrl: profile.horoscope_file_url,
-          fileName: profile.horoscope_file_name,
-        },
-      },
-    };
-  } catch (error) {
-    // service-level error
-    return {
-      success: false,
-      message: "Failed to fetch user profile",
-      error: error.message,
-    };
-  }
-};
+//     return {
+//       success: true,
+//       data: {
+//         ...profile,
+//         horoscope: {
+//           uploaded: profile.horoscope_uploaded === 1,
+//           fileUrl: profile.horoscope_file_url,
+//           fileName: profile.horoscope_file_name,
+//         },
+//       },
+//     };
+//   } catch (error) {
+//     // service-level error
+//     return {
+//       success: false,
+//       message: "Failed to fetch user profile",
+//       error: error.message,
+//     };
+//   }
+// };
 
 // module.exports.getReceivedConnections = async (userId) => {
 //   try {

@@ -72,6 +72,7 @@ const mapProfile = (p) => ({
   education: p.education,
   occupation: p.occupation,
   income: p.income,
+  workLocation: p.work_location, 
 
   email: p.email,
 
@@ -79,6 +80,8 @@ const mapProfile = (p) => ({
   mother: p.mother_name,
   grandfather: p.grandfather_name,
   grandmother: p.grandmother_name,
+  motherSideGrandfather: p.mother_side_grandfather_name, // ✅ FIX
+  motherSideGrandmother: p.mother_side_grandmother_name,
   siblings: p.siblings,
 
   raasi: p.raasi,
