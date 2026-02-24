@@ -478,6 +478,7 @@ module.exports.updateUserProfile = async (props = {}) => {
       "gender",
       "dob",
       "birth_time",
+      "phone",
       "marital_status",
       "education",
       "occupation",
