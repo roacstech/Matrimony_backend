@@ -342,6 +342,7 @@ module.exports.getReceivedConnections = async (userId) => {
       "c.from_user",
       "c.created_at",
       "p.full_name",
+      "p.id as profileId",
       "p.raasi",
       "p.gender",
       "p.income",
@@ -370,8 +371,12 @@ module.exports.acceptConnection = async (connectionId, userId) => {
     };
   }
 
-  await db("connections").where({ id: connectionId }).update({
+  await db("connections")
+  .where({ id: connectionId })
+  .update({
     status: "Accepted",
+    accepted_at: db.fn.now(), // ✅ only acceptance time
+    expires_at: null          // ✅ reset expiry until profile is viewed
   });
 
   return {
@@ -383,14 +388,13 @@ module.exports.acceptConnection = async (connectionId, userId) => {
 module.exports.getAcceptedConnections = async (userId) => {
   const rows = await db("connections as c")
     .join("profiles as p", "p.user_id", "c.from_user")
-
     .where("c.to_user", userId)
     .where("c.status", "Accepted")
-
-    // auto expire after 24 hrs
-
+    .where("p.is_active", 1) // 🔥 Filter out inactive profiles
+    .whereRaw("(c.expires_at IS NULL OR c.expires_at > NOW())") 
     .select(
       "c.id as connectionId",
+      "p.id as profileId",
       "c.created_at",
       "p.user_id",
       "p.full_name",
@@ -398,7 +402,7 @@ module.exports.getAcceptedConnections = async (userId) => {
       "p.income",
       "p.occupation",
       "p.city",
-      "p.country",
+      "p.country"
     );
 
   return rows;
