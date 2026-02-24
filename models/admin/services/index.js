@@ -84,7 +84,7 @@ const mapProfile = (p) => ({
   motherSideGrandfather: p.mother_side_grandfather_name, // ✅ FIX
   motherSideGrandmother: p.mother_side_grandmother_name,
   siblings: p.siblings,
-
+  remarks: p.remarks,
   raasi: p.raasi,
   star: p.star,
   dosham: p.dosham,
