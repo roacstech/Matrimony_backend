@@ -28,20 +28,26 @@ module.exports.submitProfile = async (payload, files, user) => {
       full_name: payload.fullName,
       gender: payload.gender,
       dob: payload.dob,
-      birth_time: convertTo24Hour(payload.birthTime),
+     phone: payload.phone,
+      // birth_time: convertTo24Hour(payload.birthTime),
+      birth_time: payload.birthTime, // already HH:mm (24-hour)
       marital_status: payload.maritalStatus,
 
       education: payload.education,
       occupation: payload.occupation,
       income: payload.income,
+       work_location: payload.workLocation, // ✅ FIX
 
       email: user.email,
 
       father_name: payload.father,
       mother_name: payload.mother,
-      grandfather_name: payload.grandfather,
-      grandmother_name: payload.grandmother,
+      grandfather_name: payload.grandfather,   // ✅ ADD
+grandmother_name: payload.grandmother,   // ✅ ADD
+  mother_side_grandfather_name: payload.motherSideGrandfather, // ✅ FIX
+  mother_side_grandmother_name: payload.motherSideGrandmother, // ✅ FIX
       siblings: payload.siblings,
+      remarks: payload.remarks, // ✅ FIX
 
       raasi: payload.raasi,
       star: payload.star,
@@ -69,7 +75,7 @@ module.exports.submitProfile = async (payload, files, user) => {
 
       is_active: 1,
     };
-
+console.log("📞 PHONE FROM PAYLOAD =>", payload.phone);
     console.log("USER FROM JWT 👉", user);
 
     // ✅ Duplicate profile check (email-based)
@@ -91,7 +97,7 @@ module.exports.submitProfile = async (payload, files, user) => {
 
     // ✅ Update user status using userid from JWT
     await db("users").where({ id: user.id }).update({ status: "PENDING" });
-    await db("users").where({ id: user.id }).update({ status: "PENDING" });
+    // await db("users").where({ id: user.id }).update({ status: "PENDING" });
 
     return {
       success: true,
@@ -108,7 +114,7 @@ module.exports.submitProfile = async (payload, files, user) => {
   }
 };
 
-//visble connections
+// //visble connections
 module.exports.getVisibleConnections = async (userId) => {
   try {
     const myProfile = await db("profiles").where({ user_id: userId }).first();
@@ -476,11 +482,15 @@ module.exports.updateUserProfile = async (props = {}) => {
       "education",
       "occupation",
       "income",
+      "work_location",
       "email",
       "father_name",
       "mother_name",
       "grandfather_name",
       "grandmother_name",
+       "motherSideGrandmother",
+       "motherSideGrandfather",
+         "workLocation",
       "siblings",
       "raasi",
       "star",
@@ -586,7 +596,7 @@ module.exports.uploadHoroscope = async ({ userId, file }) => {
 /// Get user profiles
 
 module.exports.getUserProfile = async (userId) => {
-  try {
+  try { 
     const profile = await db("profiles").where({ user_id: userId }).first();
 
     if (!profile) {
