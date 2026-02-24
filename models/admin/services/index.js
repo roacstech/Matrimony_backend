@@ -66,6 +66,7 @@ const mapProfile = (p) => ({
   fullName: p.full_name,
   gender: p.gender,
   dob: p.dob,
+   phone: phone,
   birthTime: p.birth_time,
   maritalStatus: p.marital_status,
 

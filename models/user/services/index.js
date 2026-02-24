@@ -28,6 +28,7 @@ module.exports.submitProfile = async (payload, files, user) => {
       full_name: payload.fullName,
       gender: payload.gender,
       dob: payload.dob,
+       phone: phone,
       // birth_time: convertTo24Hour(payload.birthTime),
       birth_time: payload.birthTime, // already HH:mm (24-hour)
       marital_status: payload.maritalStatus,
@@ -35,14 +36,16 @@ module.exports.submitProfile = async (payload, files, user) => {
       education: payload.education,
       occupation: payload.occupation,
       income: payload.income,
-       workLocation: payload.work_location, // ✅ FIX
+       work_location: payload.workLocation, // ✅ FIX
 
       email: user.email,
 
       father_name: payload.father,
       mother_name: payload.mother,
-   motherSideGrandfather: profile.mother_side_grandfather_name, // ✅ FIX
-  motherSideGrandmother: profile.mother_side_grandmother_name, // ✅ FIX
+      grandfather_name: payload.grandfather,   // ✅ ADD
+grandmother_name: payload.grandmother,   // ✅ ADD
+  mother_side_grandfather_name: payload.motherSideGrandfather, // ✅ FIX
+  mother_side_grandmother_name: payload.motherSideGrandmother, // ✅ FIX
       siblings: payload.siblings,
       remarks: payload.remarks, // ✅ FIX
 
@@ -588,37 +591,37 @@ module.exports.uploadHoroscope = async ({ userId, file }) => {
 
 /// Get user profiles
 
-// module.exports.getUserProfile = async (userId) => {
-//   try { 
-//     const profile = await db("profiles").where({ user_id: userId }).first();
+module.exports.getUserProfile = async (userId) => {
+  try { 
+    const profile = await db("profiles").where({ user_id: userId }).first();
 
-//     if (!profile) {
-//       return {
-//         success: false,
-//         message: "Profile not found",
-//       };
-//     }
+    if (!profile) {
+      return {
+        success: false,
+        message: "Profile not found",
+      };
+    }
 
-//     return {
-//       success: true,
-//       data: {
-//         ...profile,
-//         horoscope: {
-//           uploaded: profile.horoscope_uploaded === 1,
-//           fileUrl: profile.horoscope_file_url,
-//           fileName: profile.horoscope_file_name,
-//         },
-//       },
-//     };
-//   } catch (error) {
-//     // service-level error
-//     return {
-//       success: false,
-//       message: "Failed to fetch user profile",
-//       error: error.message,
-//     };
-//   }
-// };
+    return {
+      success: true,
+      data: {
+        ...profile,
+        horoscope: {
+          uploaded: profile.horoscope_uploaded === 1,
+          fileUrl: profile.horoscope_file_url,
+          fileName: profile.horoscope_file_name,
+        },
+      },
+    };
+  } catch (error) {
+    // service-level error
+    return {
+      success: false,
+      message: "Failed to fetch user profile",
+      error: error.message,
+    };
+  }
+};
 
 // module.exports.getReceivedConnections = async (userId) => {
 //   try {
