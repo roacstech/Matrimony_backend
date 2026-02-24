@@ -1,14 +1,22 @@
 const service = require("../services/index");
 
-
 module.exports.viewProfile = async (req, res) => {
   try {
-    const { profileId, viewerId } = req.body;
+const { profileId } = req.body;
+const viewerId = req.user.id;
+    console.log("😍😍😍", viewerId, profileId);
 
     if (!viewerId) {
       return res.status(401).json({
         success: false,
         message: "Unauthorized",
+      });
+    }
+
+    if (!profileId) {
+      return res.status(400).json({
+        success: false,
+        message: "profileId is required",
       });
     }
 

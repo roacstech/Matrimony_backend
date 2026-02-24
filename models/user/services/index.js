@@ -336,6 +336,7 @@ module.exports.getReceivedConnections = async (userId) => {
       "c.from_user",
       "c.created_at",
       "p.full_name",
+      "p.id as profileId",
       "p.raasi",
       "p.gender",
       "p.income",
@@ -379,32 +380,25 @@ module.exports.acceptConnection = async (connectionId, userId) => {
 };
 
 module.exports.getAcceptedConnections = async (userId) => {
-  try {
-    if (!userId) {
-      return { success: false, message: "Invalid userId" };
-    }
+  const rows = await db("connections as c")
+  .join("profiles as p", "p.user_id", "c.from_user")
+  .where("c.to_user", userId)
+  .where("c.status", "Accepted")
+  .whereRaw("(c.expires_at IS NULL OR c.expires_at > NOW())") // ✅ only active
+  .select(
+    "c.id as connectionId",
+    "p.id as profileId",
+    "c.created_at",
+    "p.user_id",
+    "p.full_name",
+    "p.gender",
+    "p.income",
+    "p.occupation",
+    "p.city",
+    "p.country"
+  );
 
-    const rows = await db("connections as c")
-      .join("profiles as p", "p.user_id", "c.from_user")
-      .where("c.to_user", userId)
-      .where("c.status", "Accepted")
-      .whereRaw("(c.expires_at IS NULL OR c.expires_at > NOW())") // ✅ only active
-      .select(
-        "c.id as connectionId",
-        "c.created_at",
-        "p.user_id",
-        "p.full_name",
-        "p.gender",
-        "p.income",
-        "p.occupation",
-        "p.city",
-        "p.country"
-      );
-
-    return { success: true, data: rows };
-  } catch (error) {
-    return { success: false, message: error.message };
-  }
+  return rows;
 };
 
 /// REJECT CONNECTIONS

@@ -7,7 +7,6 @@ module.exports.viewProfile = async (viewerId, profileId) => {
       return { success: false, message: "Invalid request data" };
     }
 
-    // Get the profile owner
     const profile = await db("profiles")
       .select("user_id")
       .where({ id: profileId })
@@ -19,13 +18,13 @@ module.exports.viewProfile = async (viewerId, profileId) => {
 
     const viewedUserId = profile.user_id;
 
-    // Check if this viewer has already viewed this profile
+    // Check if already viewed
     const existingView = await db("profile_views")
       .where({ viewer_id: viewerId, viewed_user_id: viewedUserId })
       .first();
 
     if (!existingView) {
-      // ✅ First time view → insert + set expiry
+      // First view → insert + set expiry
       await db("profile_views").insert({
         viewer_id: viewerId,
         viewed_user_id: viewedUserId,
@@ -42,11 +41,11 @@ module.exports.viewProfile = async (viewerId, profileId) => {
           expires_at: db.raw("NOW() + INTERVAL 24 HOUR"),
         });
 
-      return { success: true, message: "Profile viewed successfully (first view triggered expiry)" };
+      return { success: true, firstView: true, message: "Profile viewed successfully (expiry started)" };
     }
 
-    // ✅ Subsequent views → no DB insert, no expiry reset
-    return { success: true, message: "Profile already viewed before (expiry unchanged)" };
+    // Subsequent views → no insert, no expiry reset
+    return { success: true, firstView: false, message: "Profile already viewed (expiry unchanged)" };
 
   } catch (error) {
     return { success: false, message: error.message };
