@@ -381,22 +381,23 @@ module.exports.acceptConnection = async (connectionId, userId) => {
 
 module.exports.getAcceptedConnections = async (userId) => {
   const rows = await db("connections as c")
-  .join("profiles as p", "p.user_id", "c.from_user")
-  .where("c.to_user", userId)
-  .where("c.status", "Accepted")
-  .whereRaw("(c.expires_at IS NULL OR c.expires_at > NOW())") // ✅ only active
-  .select(
-    "c.id as connectionId",
-    "p.id as profileId",
-    "c.created_at",
-    "p.user_id",
-    "p.full_name",
-    "p.gender",
-    "p.income",
-    "p.occupation",
-    "p.city",
-    "p.country"
-  );
+    .join("profiles as p", "p.user_id", "c.from_user")
+    .where("c.to_user", userId)
+    .where("c.status", "Accepted")
+    .where("p.is_active", 1) // 🔥 Filter out inactive profiles
+    .whereRaw("(c.expires_at IS NULL OR c.expires_at > NOW())") 
+    .select(
+      "c.id as connectionId",
+      "p.id as profileId",
+      "c.created_at",
+      "p.user_id",
+      "p.full_name",
+      "p.gender",
+      "p.income",
+      "p.occupation",
+      "p.city",
+      "p.country"
+    );
 
   return rows;
 };
