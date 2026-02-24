@@ -28,7 +28,7 @@ module.exports.submitProfile = async (payload, files, user) => {
       full_name: payload.fullName,
       gender: payload.gender,
       dob: payload.dob,
-       phone: phone,
+     phone: payload.phone,
       // birth_time: convertTo24Hour(payload.birthTime),
       birth_time: payload.birthTime, // already HH:mm (24-hour)
       marital_status: payload.maritalStatus,
@@ -75,7 +75,7 @@ grandmother_name: payload.grandmother,   // ✅ ADD
 
       is_active: 1,
     };
-
+console.log("📞 PHONE FROM PAYLOAD =>", payload.phone);
     console.log("USER FROM JWT 👉", user);
 
     // ✅ Duplicate profile check (email-based)
