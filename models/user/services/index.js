@@ -364,8 +364,12 @@ module.exports.acceptConnection = async (connectionId, userId) => {
     };
   }
 
-  await db("connections").where({ id: connectionId }).update({
+  await db("connections")
+  .where({ id: connectionId })
+  .update({
     status: "Accepted",
+    accepted_at: db.fn.now(), // ✅ only acceptance time
+    expires_at: null          // ✅ reset expiry until profile is viewed
   });
 
   return {
@@ -375,27 +379,32 @@ module.exports.acceptConnection = async (connectionId, userId) => {
 };
 
 module.exports.getAcceptedConnections = async (userId) => {
-  const rows = await db("connections as c")
-    .join("profiles as p", "p.user_id", "c.from_user")
+  try {
+    if (!userId) {
+      return { success: false, message: "Invalid userId" };
+    }
 
-    .where("c.to_user", userId)
-    .where("c.status", "Accepted")
+    const rows = await db("connections as c")
+      .join("profiles as p", "p.user_id", "c.from_user")
+      .where("c.to_user", userId)
+      .where("c.status", "Accepted")
+      .whereRaw("(c.expires_at IS NULL OR c.expires_at > NOW())") // ✅ only active
+      .select(
+        "c.id as connectionId",
+        "c.created_at",
+        "p.user_id",
+        "p.full_name",
+        "p.gender",
+        "p.income",
+        "p.occupation",
+        "p.city",
+        "p.country"
+      );
 
-    // auto expire after 24 hrs
-
-    .select(
-      "c.id as connectionId",
-      "c.created_at",
-      "p.user_id",
-      "p.full_name",
-      "p.gender",
-      "p.income",
-      "p.occupation",
-      "p.city",
-      "p.country",
-    );
-
-  return rows;
+    return { success: true, data: rows };
+  } catch (error) {
+    return { success: false, message: error.message };
+  }
 };
 
 /// REJECT CONNECTIONS
