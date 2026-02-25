@@ -15,3 +15,24 @@ exports.rejectTemplate = (name, reason = "") => `
   <br/>
   <p>– Admin Dasapalanjiga Kalyanamalai</p>
 `;
+
+
+exports.otpTemplate = (otp) => `
+  <h2>Password Reset OTP</h2>
+  <p>Your OTP is:</p>
+  <h1 style="letter-spacing:3px;">${otp}</h1>
+  <p>This OTP is valid for 10 minutes.</p>
+  <br/>
+  <p>– Kalyanamalai Team</p>
+`;
+
+module.exports.passwordResetSuccessTemplate = (name) => {
+  return `
+    <div style="font-family: Arial, sans-serif; padding: 20px;">
+      <h2>Password Reset Successful</h2>
+      <p>Hi <strong>${name}</strong>,</p>
+      <p>Your password has been reset successfully.</p>
+      <p>If you did not do this, please contact support immediately.</p>
+    </div>
+  `;
+};
