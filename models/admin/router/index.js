@@ -28,4 +28,8 @@ router.put("/users/visibility", controller.adminToggleVisibility);
 // 🔹 DASHBOARD STATS
 router.get("/dashboard", controller.getAdminDashboard);
 
+
+
+router.get("/rejected-count", controller.getRejectedCount);
+
 module.exports = router;
