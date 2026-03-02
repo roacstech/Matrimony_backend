@@ -231,6 +231,18 @@ module.exports.adminRejectUser = async (userId, reason) => {
   }
 };
 
+module.exports.getRejectedCount = async () => {
+  try {
+    const [{ count }] = await db("profiles")
+      .where({ status: "REJECTED" })
+      .count("id as count");
+
+    return { success: true, rejectedCount: count };
+  } catch (err) {
+    console.error("SERVICE ERROR 👉", err);
+    return { success: false, message: "Failed to fetch rejected count" };
+  }
+};
 
 // 👁 TOGGLE VISIBILITY
 // services/admin.service.js

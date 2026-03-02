@@ -77,6 +77,23 @@ module.exports.adminRejectUser = async (req, res) => {
   }
 };
 
+
+
+module.exports.getRejectedCount = async (req, res) => {
+  try {
+    const result = await adminService.getRejectedCount();
+
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+
+    res.json(result);
+  } catch (err) {
+    console.error("CONTROLLER ERROR 👉", err);
+    res.status(500).json({ success: false, message: "Failed to fetch rejected count" });
+  }
+};
+
 // 👁 TOGGLE VISIBILITY
 module.exports.adminToggleVisibility = async (req, res) => {
   try {
