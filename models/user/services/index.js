@@ -31,6 +31,7 @@ module.exports.submitProfile = async (payload, files, user) => {
      phone: payload.phone,
       // birth_time: convertTo24Hour(payload.birthTime),
       birth_time: payload.birthTime, // already HH:mm (24-hour)
+       birth_place: payload.birthPlace, // ✅ IMPORTANT
       marital_status: payload.maritalStatus,
 
       education: payload.education,
