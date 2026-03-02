@@ -167,7 +167,7 @@ module.exports.adminApproveUser = async (userId) => {
     // 4️⃣ send mail
     await sendMail({
       to: user.email,
-      subject: "Welcome to Dasapalanjiga Kalyanamalai 💍",
+      subject: "Welcome to Dasabalanjika Kalyanamalai 💍",
       html: acceptTemplate(profile.full_name),
     });
 
