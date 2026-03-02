@@ -176,8 +176,9 @@ module.exports.getVisibleConnections = async (userId) => {
         // expose connection status for this user → profile
         db.raw("COALESCE(c.status, 'Not Sent') as connection_status")
       )
-      .whereNot("p.user_id", userId)
-      .andWhere("p.gender", "!=", myProfile.gender);
+     .whereNot("p.user_id", userId)
+      .andWhere("p.gender", "!=", myProfile.gender)
+      .andWhere("p.is_active", 1);   // ✅ MAIN FIX
 
     return {
       success: true,
