@@ -344,6 +344,7 @@ module.exports.getReceivedConnections = async (userId) => {
     .join("profiles as p", "p.user_id", "c.from_user")
     .where("c.to_user", userId)
     .where("c.status", "Sent")
+    .where("p.is_active", 1) // 👈 ONLY THIS LINE ADDED
     .select(
       "c.id as connectionId",
       "c.from_user",
