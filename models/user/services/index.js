@@ -31,6 +31,7 @@ module.exports.submitProfile = async (payload, files, user) => {
      phone: payload.phone,
       // birth_time: convertTo24Hour(payload.birthTime),
       birth_time: payload.birthTime, // already HH:mm (24-hour)
+       birth_place: payload.birthPlace, // ✅ IMPORTANT
       marital_status: payload.maritalStatus,
 
       education: payload.education,
@@ -175,8 +176,9 @@ module.exports.getVisibleConnections = async (userId) => {
         // expose connection status for this user → profile
         db.raw("COALESCE(c.status, 'Not Sent') as connection_status")
       )
-      .whereNot("p.user_id", userId)
-      .andWhere("p.gender", "!=", myProfile.gender);
+     .whereNot("p.user_id", userId)
+      .andWhere("p.gender", "!=", myProfile.gender)
+      .andWhere("p.is_active", 1);   // ✅ MAIN FIX
 
     return {
       success: true,

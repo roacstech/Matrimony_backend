@@ -1,10 +1,10 @@
 exports.acceptTemplate = (name) => `
-  <h2>Welcome to Dasapalanjiga Kalyanamalai 💍</h2>
+  <h2>Welcome to Dasabalanjika Kalyanamalai 💍</h2>
   <p>Hi <b>${name}</b>,</p>
   <p>Your profile has been approved by our admin.</p>
   <p>You can now start exploring matches.</p>
   <br/>
-  <p>– Admin Dasapalanjiga Kalyanamalai</p>
+  <p>– Admin Dasabalanjika Kalyanamalai</p>
 `;
 
 exports.rejectTemplate = (name, reason = "") => `
@@ -13,7 +13,7 @@ exports.rejectTemplate = (name, reason = "") => `
   <p>We regret to inform you that your profile was rejected.</p>
   ${reason ? `<p><b>Reason:</b> ${reason}</p>` : ""}
   <br/>
-  <p>– Admin Dasapalanjiga Kalyanamalai</p>
+  <p>– Admin Dasabalanjika Kalyanamalai</p>
 `;
 
 
