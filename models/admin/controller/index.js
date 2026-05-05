@@ -151,4 +151,27 @@ exports.getSingleUser = async (req, res) => {
   }
 };
 
+//Delete User
+module.exports.deleteUser = async (req, res) => {
+  try {
+    const deleted = await adminService.deleteUser(Number(req.params.id));
+    if (!deleted) {
+      return res.status(404).json({
+        status: false,
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      status: true,
+      message: "User deleted successfully",
+    });
+  } catch (error) {
+    console.error("Delete user controller error:", error);
+    return res.status(500).json({
+      status: false,
+      message: error.message || "Failed to delete user",
+    });
+  }
+};
 

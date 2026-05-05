@@ -356,3 +356,21 @@ module.exports.getSingleUser = async (userId) => {
     return { success: false, error: err.message };
   }
 };
+
+
+
+///Delete users
+module.exports.deleteUser = async (userId) => {
+  try {
+    const profile = await db("profiles").where({ id: userId }).first();
+    if (!profile) return false;
+
+    await db("profiles").where({ id: userId }).del();
+    await db("users").where({ id: profile.user_id }).del();
+
+    return true;
+  } catch (error) {
+    console.error("Delete user service error:", error);
+    throw error;
+  }
+};

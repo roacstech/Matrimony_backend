@@ -32,4 +32,8 @@ router.get("/dashboard", controller.getAdminDashboard);
 
 router.get("/rejected-count", controller.getRejectedCount);
 
+
+///Delete Users
+router.delete("/users/:id", controller.deleteUser);
+
 module.exports = router;
