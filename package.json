@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-  
-     "start": "cross-env NODE_ENV=OTDEV nodemon server.js",
-  "dev": "cross-env NODE_ENV=OTLIVE nodemon server.js",
+    "start": "nodemon server.js",
+    "dev": "cross-env NODE_ENV=OTDEV nodemon server.js",
+    "live": "cross-env NODE_ENV=OTLIVE nodemon server.js",
     "build": "echo \"No build step required for backend\""
   },
   "dependencies": {
@@ -21,8 +21,5 @@
     "mysql2": "^3.9.0",
     "nodemailer": "^7.0.13",
     "nodemon": "^3.1.14"
-  },
-  "devDependencies": {
-    "cross-env": "^10.1.0"
   }
 }
