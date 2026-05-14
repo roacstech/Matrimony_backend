@@ -4,8 +4,8 @@
   "main": "server.js",
   "scripts": {
     "start": "nodemon server.js",
-    "dev": "cross-env NODE_ENV=OTDEV nodemon server.js",
-    "live": "cross-env NODE_ENV=OTLIVE nodemon server.js",
+    "dev": "NODE_ENV=OTDEV nodemon server.js",
+    "live": "NODE_ENV=OTLIVE nodemon server.js",
     "build": "echo \"No build step required for backend\""
   },
   "dependencies": {
