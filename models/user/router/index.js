@@ -123,7 +123,12 @@ router.get(
   controller.getSentConnections
 );
 
-
+// GET ALL CONNECTIONS (sent + received)
+router.get(
+  "/connections/all",
+  authMiddleware,
+  controller.getAllConnections
+);
 
 
 module.exports = router;

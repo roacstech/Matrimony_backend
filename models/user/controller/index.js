@@ -29,6 +29,26 @@ module.exports.submitProfile = async (req, res) => {
   }
 };
 
+// GET ALL CONNECTIONS
+module.exports.getAllConnections = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const result = await service.getAllConnections(userId);
+
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+
+    return res.status(200).json(result);
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      error: error.message,
+    });
+  }
+};
+
 
 module.exports.getVisibleConnections = async (req, res) => {
   try {

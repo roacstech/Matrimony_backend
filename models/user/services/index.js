@@ -28,33 +28,30 @@ module.exports.submitProfile = async (payload, files, user) => {
       full_name: payload.fullName,
       gender: payload.gender,
       dob: payload.dob,
-     phone: payload.phone,
-      // birth_time: convertTo24Hour(payload.birthTime),
-      birth_time: payload.birthTime, // already HH:mm (24-hour)
-       birth_place: payload.birthPlace, // ✅ IMPORTANT
+      phone: payload.phone,
+      birth_time: payload.birthTime,
+      birth_place: payload.birthPlace,
       marital_status: payload.maritalStatus,
 
       education: payload.education,
       occupation: payload.occupation,
       income: payload.income,
-       work_location: payload.workLocation, // ✅ FIX
+      work_location: payload.workLocation,
 
       email: user.email,
 
       father_name: payload.father,
       mother_name: payload.mother,
-      grandfather_name: payload.grandfather,   // ✅ ADD
-grandmother_name: payload.grandmother,   // ✅ ADD
-  mother_side_grandfather_name: payload.motherSideGrandfather, // ✅ FIX
-  mother_side_grandmother_name: payload.motherSideGrandmother, // ✅ FIX
+      grandfather_name: payload.grandfather,
+      grandmother_name: payload.grandmother,
+      mother_side_grandfather_name: payload.motherSideGrandfather,
+      mother_side_grandmother_name: payload.motherSideGrandmother,
       siblings: payload.siblings,
-      remarks: payload.remarks, // ✅ FIX
+      remarks: payload.remarks,
 
       raasi: payload.raasi,
       star: payload.star,
       dosham: payload.dosham || "No",
-
-      birth_place: payload.city,
 
       religion: payload.religion,
       caste: payload.caste,
@@ -66,18 +63,25 @@ grandmother_name: payload.grandmother,   // ✅ ADD
       privacy: payload.privacy,
       is_public: payload.privacy === "Public" ? 1 : 0,
 
-      horoscope_uploaded: files?.horoscope ? 1 : 0,
-      horoscope_file_name: files?.horoscope?.[0]?.filename || null,
-      horoscope_file_url: files?.horoscope
-        ? `/uploads/horoscope/${files.horoscope[0].filename}`
+      // ✅ Use S3 URLs from payload (sent by frontend after upload)
+      // Saves: https://roacs-bucket.s3.ap-south-1.amazonaws.com/matrimony-profiles/horoscopes/uuid.pdf
+      horoscope_uploaded: payload.horoscopeUrl ? 1 : 0,
+      horoscope_file_name: payload.horoscopeUrl
+        ? payload.horoscopeUrl.split("/").pop()   // extracts "uuid.pdf" from the full URL
         : null,
+      horoscope_file_url: payload.horoscopeUrl || null,
 
-      photo: files?.photo?.[0]?.filename || null,
+      // ✅ Use S3 URL from payload
+      // Saves: https://roacs-bucket.s3.ap-south-1.amazonaws.com/matrimony-profiles/photos/uuid.jpg
+      photo: payload.photoUrl || null,
 
       is_active: 1,
     };
-console.log("📞 PHONE FROM PAYLOAD =>", payload.phone);
+
+    console.log("📞 PHONE FROM PAYLOAD =>", payload.phone);
     console.log("USER FROM JWT 👉", user);
+    console.log("📸 PHOTO S3 URL =>", payload.photoUrl);
+    console.log("📄 HOROSCOPE S3 URL =>", payload.horoscopeUrl);
 
     // ✅ Duplicate profile check (email-based)
     const existingProfile = await db("profiles")
@@ -92,13 +96,11 @@ console.log("📞 PHONE FROM PAYLOAD =>", payload.phone);
     }
 
     // ✅ Insert profile
-
     const [profileId] = await db("profiles").insert(insertData);
-    console.log("test id ", profileId);
+    console.log("Profile inserted with ID:", profileId);
 
-    // ✅ Update user status using userid from JWT
+    // ✅ Update user status
     await db("users").where({ id: user.id }).update({ status: "PENDING" });
-    // await db("users").where({ id: user.id }).update({ status: "PENDING" });
 
     return {
       success: true,
@@ -106,8 +108,7 @@ console.log("📞 PHONE FROM PAYLOAD =>", payload.phone);
       data: { profileId },
     };
   } catch (error) {
-    console.error("Submit Profile Error namma tha:", error);
-    console.error("Submit Profile Error namma tha:", error);
+    console.error("Submit Profile Error:", error);
     return {
       success: false,
       message: error.message,
@@ -637,6 +638,50 @@ module.exports.getUserProfile = async (userId) => {
   }
 };
 
+
+// GET ALL CONNECTIONS (sent + received) for a user
+module.exports.getAllConnections = async (userId) => {
+  try {
+    const rows = await db("connections as c")
+      .leftJoin("profiles as sender", "sender.user_id", "c.from_user")
+      .leftJoin("profiles as receiver", "receiver.user_id", "c.to_user")
+      .select(
+        "c.id as connectionId",
+        "c.status",
+        "c.created_at",
+        db.raw(`CASE WHEN c.from_user = ? THEN 'sent' ELSE 'received' END as direction`, [userId]),
+
+        // Sender info
+        "sender.full_name as from_user_name",
+        "sender.gender as from_user_gender",
+        "sender.occupation as from_user_occupation",
+        "sender.city as from_user_city",
+        "sender.photo as from_user_photo",
+
+        // Receiver info
+        "receiver.full_name as to_user_name",
+        "receiver.gender as to_user_gender",
+        "receiver.occupation as to_user_occupation",
+        "receiver.city as to_user_city",
+        "receiver.photo as to_user_photo",
+      );
+
+    return {
+      success: true,
+      message: rows.length ? "Connections fetched" : "No connections found",
+      data: {
+        total: rows.length,
+        connections: rows,
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: "Failed to fetch all connections",
+      error: error.message,
+    };
+  }
+};
 // module.exports.getReceivedConnections = async (userId) => {
 //   try {
 //     const rows = await db("connections as c")
