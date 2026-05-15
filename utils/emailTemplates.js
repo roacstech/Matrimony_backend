@@ -36,3 +36,4 @@ module.exports.passwordResetSuccessTemplate = (name) => {
     </div>
   `;
 };
+

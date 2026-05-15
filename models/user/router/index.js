@@ -9,16 +9,21 @@ const path = require("path"); // 👈 ADD THIS
 
 
 //form submit
-
 router.post(
   "/form/submit",
   authMiddleware,
-  upload.fields([
-    { name: "photo", maxCount: 1 },
-    { name: "horoscope", maxCount: 1 },
-  ]),
-  controller.submitProfile,
+  controller.submitProfile,  // clean JSON, no multer needed
 );
+
+// router.post(
+//   "/form/submit",
+//   authMiddleware,
+//   upload.fields([
+//     { name: "photo", maxCount: 1 },
+//     { name: "horoscope", maxCount: 1 },
+//   ]),
+//   controller.submitProfile,
+// );
 
 /// GET RECEIVED CONNECTIONS
 router.get(

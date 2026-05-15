@@ -4,21 +4,27 @@ module.exports.getPendingForms = async (req, res) => {
   try {
     const result = await adminService.getPendingForms();
 
+    if (!result.success) {
+      return res.status(200).json({
+        success: false,
+        message: result.message,
+        data: [],
+      });
+    }
+
     return res.status(200).json({
       success: true,
-      message: "Pending forms fetched successfully",
-      data: result,
+      message: result.message,
+      data: result.data,   // ✅ result.data, not result (was double-wrapping before)
     });
   } catch (error) {
     console.error("Get Pending Forms Error:", error);
-
     return res.status(500).json({
       success: false,
       message: "Failed to fetch pending forms",
     });
   }
 };
-
 // 🔹 GET ALL USERS
 module.exports.getAllUsers = async (req, res) => {
   try {

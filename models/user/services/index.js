@@ -1,11 +1,14 @@
 //new change by vinoth
 
 const db = require("../../../config/db");
+const { newProfileSubmissionTemplate } = require("../../../utils/newProfileSubmission"); // ✅ your templates path
+const { sendMail } = require("../../../utils/mailer"); // ✅ your mailer util path
 
 // 🔄 Convert 12h → 24h
 function convertTo24Hour(time12h) {
   if (!time12h) return null;
-  if (/^\d{2}:\d{2}$/.test(time12h)) return time12h;
+  if (/^\d{2}:\d{2}$/.test(time12h)) return time12h + ":00"; // ← add :00
+  if (/^\d{2}:\d{2}:\d{2}$/.test(time12h)) return time12h;  // already has seconds
 
   const parts = time12h.trim().split(" ");
   if (parts.length !== 2) return null;
@@ -17,7 +20,7 @@ function convertTo24Hour(time12h) {
   if (period === "PM" && hours !== 12) hours += 12;
   if (period === "AM" && hours === 12) hours = 0;
 
-  return `${hours.toString().padStart(2, "0")}:${minutes}`;
+  return `${hours.toString().padStart(2, "0")}:${minutes}:00`; // ← :00 added
 }
 
 module.exports.submitProfile = async (payload, files, user) => {
@@ -29,7 +32,7 @@ module.exports.submitProfile = async (payload, files, user) => {
       gender: payload.gender,
       dob: payload.dob,
       phone: payload.phone,
-      birth_time: payload.birthTime,
+      birth_time: convertTo24Hour(payload.birthTime),
       birth_place: payload.birthPlace,
       marital_status: payload.maritalStatus,
 
@@ -63,16 +66,12 @@ module.exports.submitProfile = async (payload, files, user) => {
       privacy: payload.privacy,
       is_public: payload.privacy === "Public" ? 1 : 0,
 
-      // ✅ Use S3 URLs from payload (sent by frontend after upload)
-      // Saves: https://roacs-bucket.s3.ap-south-1.amazonaws.com/matrimony-profiles/horoscopes/uuid.pdf
       horoscope_uploaded: payload.horoscopeUrl ? 1 : 0,
       horoscope_file_name: payload.horoscopeUrl
-        ? payload.horoscopeUrl.split("/").pop()   // extracts "uuid.pdf" from the full URL
+        ? payload.horoscopeUrl.split("/").pop()
         : null,
       horoscope_file_url: payload.horoscopeUrl || null,
 
-      // ✅ Use S3 URL from payload
-      // Saves: https://roacs-bucket.s3.ap-south-1.amazonaws.com/matrimony-profiles/photos/uuid.jpg
       photo: payload.photoUrl || null,
 
       is_active: 1,
@@ -101,6 +100,19 @@ module.exports.submitProfile = async (payload, files, user) => {
 
     // ✅ Update user status
     await db("users").where({ id: user.id }).update({ status: "PENDING" });
+
+    // ✅ Notify admin via email (non-blocking)
+    try {
+      await sendMail({
+        to: "roacstech@gmail.com",
+        subject: `New Profile Submitted – ${payload.fullName}`,
+        html: newProfileSubmissionTemplate(payload.fullName, user.email),
+      });
+      console.log("📧 Admin notified about new profile submission");
+    } catch (mailErr) {
+      console.error("⚠️ Admin mail failed:", mailErr.message);
+      // ✅ Mail failure won't affect the profile submission response
+    }
 
     return {
       success: true,

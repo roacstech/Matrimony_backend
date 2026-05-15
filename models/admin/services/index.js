@@ -7,7 +7,22 @@ const {
 
 module.exports.getPendingForms = async () => {
   try {
-    const pendingForms = await db("users").where({ status: "PENDING" });
+    const pendingForms = await db("users as u")
+      .join("profiles as p", "p.user_id", "u.id")
+      .where("u.status", "PENDING")
+      .select(
+        "u.id",
+        "u.email",
+        "u.status",
+        "p.full_name",
+        "p.phone",
+        "p.city",
+        "p.country",
+        "p.photo",
+        "p.gender",
+        "p.privacy",
+        "p.created_at",
+      );
 
     if (!pendingForms || pendingForms.length === 0) {
       return {
@@ -19,7 +34,7 @@ module.exports.getPendingForms = async () => {
     return {
       success: true,
       message: "Pending forms fetched successfully",
-      data: pendingForms || [],
+      data: pendingForms,
     };
   } catch (error) {
     return {
