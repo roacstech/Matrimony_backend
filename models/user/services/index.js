@@ -3,6 +3,12 @@
 const db = require("../../../config/db");
 const { newProfileSubmissionTemplate } = require("../../../utils/newProfileSubmission"); // ✅ your templates path
 const { sendMail } = require("../../../utils/mailer"); // ✅ your mailer util path
+const {
+  connectionRequestSentTemplate,
+  connectionRequestReceivedTemplate,
+  connectionRequestAcceptedTemplate,
+  connectionRequestRejectedTemplate,
+} = require("../../../utils/emailTemplates");
 
 // 🔄 Convert 12h → 24h
 function convertTo24Hour(time12h) {
@@ -279,14 +285,26 @@ if (sentCount >= 3) {
     });
 
     const fromUserProfile = await db("profiles")
-      .select("id", "full_name", "gender", "city", "country", "user_id")
+      .select("id", "full_name", "email", "gender", "city", "country", "user_id")
       .where({ user_id: fromUserId })
       .first();
 
     const toUserProfile = await db("profiles")
-      .select("id", "full_name", "gender", "city", "country", "user_id")
+      .select("id", "full_name", "email", "gender", "city", "country", "user_id")
       .where({ user_id: toUserId })
       .first();
+
+    if (toUserProfile && toUserProfile.email && fromUserProfile) {
+      try {
+        await sendMail({
+          to: toUserProfile.email,
+          subject: "New Connection Request",
+          html: connectionRequestReceivedTemplate(toUserProfile.full_name, fromUserProfile.full_name),
+        });
+      } catch (err) {
+        console.error("Mail error (receiver):", err);
+      }
+    }
 
     return {
       success: true,
@@ -400,6 +418,22 @@ module.exports.acceptConnection = async (connectionId, userId) => {
     expires_at: null          // ✅ reset expiry until profile is viewed
   });
 
+  // Fetch profiles for email notification
+  const fromUserProfile = await db("profiles").where({ user_id: connection.from_user }).first();
+  const toUserProfile = await db("profiles").where({ user_id: connection.to_user }).first();
+
+  if (fromUserProfile && fromUserProfile.email && toUserProfile) {
+    try {
+      await sendMail({
+        to: fromUserProfile.email,
+        subject: "Connection Request Accepted! 🎉",
+        html: connectionRequestAcceptedTemplate(fromUserProfile.full_name, toUserProfile.full_name),
+      });
+    } catch (err) {
+      console.error("Mail error (accept connection):", err);
+    }
+  }
+
   return {
     success: true,
     message: "Connection accepted successfully",
@@ -451,6 +485,22 @@ module.exports.rejectConnection = async (connectionId, userId) => {
   await db("connections")
     .where({ id: connectionId })
     .update({ status: "Rejected" });
+
+  // Fetch profiles for email notification
+  const fromUserProfile = await db("profiles").where({ user_id: connection.from_user }).first();
+  const toUserProfile = await db("profiles").where({ user_id: connection.to_user }).first();
+
+  if (fromUserProfile && fromUserProfile.email && toUserProfile) {
+    try {
+      await sendMail({
+        to: fromUserProfile.email,
+        subject: "Connection Request Update",
+        html: connectionRequestRejectedTemplate(fromUserProfile.full_name, toUserProfile.full_name),
+      });
+    } catch (err) {
+      console.error("Mail error (reject connection):", err);
+    }
+  }
 
   return {
     success: true,
